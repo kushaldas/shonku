@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"code.google.com/p/go-sqlite/go1/sqlite3"
 	"crypto/sha256"
+	"github.com/russross/blackfriday"
 	"database/sql"
 	"encoding/base64"
 	"fmt"
@@ -13,6 +14,8 @@ import (
 	"os"
 	"strings"
 	"bytes"
+	"time"
+	"sort"
 )
 
 type Article struct {
@@ -25,9 +28,17 @@ type Post struct {
 	Title 	string
 	Slug 	string
 	Body 	string
-	Date 	string
+	Date 	time.Time
 	Tags 	[]string
 }
+
+type ByDate []Post
+
+
+func (a ByDate) Len() int           { return len(a) }
+func (a ByDate) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByDate) Less(i, j int) bool { return a[i].Date.After(a[j].Date) }
+
 
 /*
 Creates the empty build database.
@@ -172,25 +183,42 @@ func read_post(filename string) Post {
 		
 		p.Title = title
 		p.Slug = get_slug(title)
-		p.Body = buffer.String()
-		p.Date = date
+		body := blackfriday.MarkdownCommon(buffer.Bytes())
+		p.Body = string(body)
+		p.Date = get_time(date)
 		p.Tags = tags
 		
 	}
 	return p
 }
 
+func get_time(text string) time.Time {
+	const longform = "2006-01-02 15:04:05.999999999 -0700 MST"
+	//now := time.Now()
+	//x := now.String()
+	//fmt.Println(x)
+	new_now, err := time.Parse(longform, text) 
+	if err != nil {
+		fmt.Println(err)
+	}
+	return new_now
+
+}
+
 func main() {
+	ps := make([]Post, 0)
 	names := findfiles()
 	for i := range names {
 		hash := create_hash(names[i])
 		if changed_ornot(names[i], hash) {
 			fmt.Println(names[i])
 		}
+		post := read_post(names[i])
+		ps = append(ps, post)
 	}
 
-	s := "and but (hekko38) the9"
-	fmt.Println(get_slug(s))
+	sort.Sort(ByDate(ps))
 
-	read_post("./posts/first.md")
+	fmt.Println(ps)
+
 }
