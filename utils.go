@@ -2,20 +2,21 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"code.google.com/p/go-sqlite/go1/sqlite3"
 	"crypto/sha256"
-	"github.com/russross/blackfriday"
 	"database/sql"
 	"encoding/base64"
 	"fmt"
+	"github.com/russross/blackfriday"
+	"html/template"
 	"io"
 	"io/ioutil"
 	"net/url"
 	"os"
-	"strings"
-	"bytes"
-	"time"
 	"sort"
+	"strings"
+	"time"
 )
 
 type Article struct {
@@ -25,20 +26,24 @@ type Article struct {
 }
 
 type Post struct {
-	Title 	string
-	Slug 	string
-	Body 	string
-	Date 	time.Time
-	Tags 	[]string
+	Title string
+	Slug  string
+	Body  template.HTML
+	Date  time.Time
+	Tags  []string
 }
 
 type ByDate []Post
-
 
 func (a ByDate) Len() int           { return len(a) }
 func (a ByDate) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a ByDate) Less(i, j int) bool { return a[i].Date.After(a[j].Date) }
 
+type ByODate []Post
+
+func (a ByODate) Len() int           { return len(a) }
+func (a ByODate) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByODate) Less(i, j int) bool { return a[j].Date.After(a[i].Date) }
 
 /*
 Creates the empty build database.
@@ -134,7 +139,7 @@ func get_slug(s string) string {
 	s = strings.Replace(s, " ", "-", -1)
 	s = strings.Replace(s, "(", "-", -1)
 	s = url.QueryEscape(s)
-	return s
+	return strings.ToLower(s)
 }
 
 /*
@@ -155,7 +160,7 @@ func read_post(filename string) Post {
 	dateline, err := r.ReadString('\n')
 	line, err := r.ReadString('\n')
 	tagline := line
-	
+
 	for err == nil {
 		if line == "====\n" {
 			flag = true
@@ -168,7 +173,6 @@ func read_post(filename string) Post {
 		line, err = r.ReadString('\n')
 	}
 
-
 	if err == io.EOF {
 		title := titleline[6:]
 		title = strings.TrimSpace(title)
@@ -176,18 +180,18 @@ func read_post(filename string) Post {
 		date = strings.TrimSpace(date)
 		tagsnonstripped := strings.Split(tagline[5:], ",")
 		tags := make([]string, 0)
-		for i := range(tagsnonstripped) {
+		for i := range tagsnonstripped {
 			word := strings.TrimSpace(tagsnonstripped[i])
 			tags = append(tags, word)
 		}
-		
+
 		p.Title = title
 		p.Slug = get_slug(title)
 		body := blackfriday.MarkdownCommon(buffer.Bytes())
-		p.Body = string(body)
+		p.Body = template.HTML(string(body))
 		p.Date = get_time(date)
 		p.Tags = tags
-		
+
 	}
 	return p
 }
@@ -197,7 +201,7 @@ func get_time(text string) time.Time {
 	//now := time.Now()
 	//x := now.String()
 	//fmt.Println(x)
-	new_now, err := time.Parse(longform, text) 
+	new_now, err := time.Parse(longform, text)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -205,20 +209,66 @@ func get_time(text string) time.Time {
 
 }
 
+/*
+Builds a post based on the template
+*/
+func build_post(ps Post) string {
+	var doc bytes.Buffer
+	var body string
+	tml, _ := template.ParseFiles("./templates/post.html")
+	err := tml.Execute(&doc, ps)
+	if err != nil {
+		fmt.Println(err)
+	}
+	body = doc.String()
+	name := "./output/" + ps.Slug + ".html"
+	f, err := os.Create(name)
+	defer f.Close()
+	n, err := io.WriteString(f, body)
+
+    if err != nil {
+        fmt.Println(n, err)
+    }
+    
+	
+	return body
+}
+
 func main() {
+	createdb()
+
 	ps := make([]Post, 0)
+	//sort_index := make([]Post, 0)
 	names := findfiles()
 	for i := range names {
 		hash := create_hash(names[i])
-		if changed_ornot(names[i], hash) {
-			fmt.Println(names[i])
-		}
 		post := read_post(names[i])
 		ps = append(ps, post)
+		if changed_ornot(names[i], hash) {
+			fmt.Println(names[i])
+			build_post(post)
+
+		}
 	}
 
-	sort.Sort(ByDate(ps))
+	sort.Sort(ByODate(ps))
 
-	fmt.Println(ps)
+	/*
+		index := 1
+		num := 0
+
+		for i := range(ps) {
+			sort_index = append(sort_index, ps[i])
+			num = num + 1
+			if num == 2 {
+				sort.Sort(ByODate(sort_index))
+				fmt.Println(sort_index)
+				sort_index = make([]Post, 0)
+				fmt.Println("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", index)
+				index = index + 1
+				num = 0
+
+			}
+		}*/
 
 }
