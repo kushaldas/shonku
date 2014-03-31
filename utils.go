@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"crypto/sha256"
 	"encoding/base64"
+	"net/url"
+	"strings"
 )
 
 type Article struct {
@@ -104,6 +106,20 @@ func changed_ornot(filename, hash string) bool {
 	return true
 }
 
+/*
+Returns the slug of the article
+TODO:
+We need to improve this function much more.
+*/
+func get_slug(s string) string {
+	s = strings.Replace(s, "(", "-", -1)
+	s = strings.Replace(s, ")", "-", -1)
+	s = strings.Replace(s, " ", "-", -1)
+	s = strings.Replace(s, "(", "-", -1)
+	s = url.QueryEscape(s)
+	return s
+}
+
 func main() {
 	names := findfiles()
 	for i := range(names) {
@@ -112,4 +128,7 @@ func main() {
 			fmt.Println(names[i])
 		}
 	}
+
+	s := "and but (hekko38) the9"
+	fmt.Println(get_slug(s))
 }
