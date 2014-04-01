@@ -1,0 +1,44 @@
+<html>
+<head>
+	<title>Index</title>
+</head>
+<body>
+	<div class="container-fluid" id="container-fluid">
+    <!--Body content-->
+    <div class="row-fluid">
+    <div class="span2"></div>
+    <div class="span8">
+
+    	{{range .Posts}}
+    	<div class="postbox">
+	        <h1><a href="posts/{{ .Slug }}.html">{{ .Title }}</a></h1>
+	        <small>  
+	             Posted: {{ .Date }}
+	        </small>
+	        <hr>
+	        {{ .Body }}
+	        <p>
+	            <a href="posts/{{ .Slug }}.html#disqus_thread">Comments</a>
+	        </p>
+    	</div>
+    	{{ end }}
+<ul class="pager">
+	{{if .NextF }}
+    {{if .NextLast }}
+	<li class="previous">
+        <a href="index.html">Newer posts</a>
+    </li>
+    {{else}}
+    <li class="previous">
+        <a href="index-{{ .Next }}.html">Newer posts</a>
+    </li>
+    {{end}}
+    {{end}}
+	{{if .PreviousF }}
+    <li class="next">
+        <a href="index-{{ .Previous }}.html">Older posts</a>
+    </li>
+    {{end}}
+</ul>
+</body>
+</html>

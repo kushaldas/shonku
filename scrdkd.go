@@ -33,6 +33,16 @@ type Post struct {
 	Tags  []string
 }
 
+type Indexposts struct {
+	Posts []Post
+	NextF bool
+	PreviousF bool
+	Next int
+	Previous int
+	NextLast bool
+}
+
+
 type ByDate []Post
 
 func (a ByDate) Len() int           { return len(a) }
@@ -226,17 +236,61 @@ func build_post(ps Post) string {
 	defer f.Close()
 	n, err := io.WriteString(f, body)
 
-    if err != nil {
-        fmt.Println(n, err)
-    }
-    
-	
+	if err != nil {
+		fmt.Println(n, err)
+	}
+
 	return body
+}
+
+func build_index(pss []Post, index, pre, next int) {
+	fmt.Println(index, pre, next)
+	var doc bytes.Buffer
+	var body, name string
+	var ips Indexposts
+	ips.Posts = pss
+	if pre != 0 {
+		ips.PreviousF = true
+		ips.Previous = pre
+	} else {
+		ips.PreviousF = false
+	}
+	if next > 0 {
+		ips.NextF = true
+		ips.Next = next
+	} else if next == -1 {
+		ips.NextF = false
+	} else {
+		ips.NextF = true
+		ips.Next = next
+	}
+	if next == 0 {
+		ips.NextLast = true
+	}
+
+	tml, _ := template.ParseFiles("./templates/index.html")
+	err := tml.Execute(&doc, ips)
+	if err != nil {
+		fmt.Println(err)
+	}
+	body = doc.String()
+	if next == -1 {
+		name = "./output/index.html"
+	} else {
+		name = fmt.Sprintf("./output/index-%d.html", index)
+	}
+	f, err := os.Create(name)
+	defer f.Close()
+	n, err := io.WriteString(f, body)
+
+	if err != nil {
+		fmt.Println(n, err)
+	}
 }
 
 func main() {
 	createdb()
-
+	rebuild_index := false
 	ps := make([]Post, 0)
 	//sort_index := make([]Post, 0)
 	names := findfiles()
@@ -247,28 +301,46 @@ func main() {
 		if changed_ornot(names[i], hash) {
 			fmt.Println(names[i])
 			build_post(post)
+			rebuild_index = true
 
 		}
 	}
 
 	sort.Sort(ByODate(ps))
 
-	/*
+	if rebuild_index == true {
+		var prev, next int
 		index := 1
 		num := 0
-
-		for i := range(ps) {
+		length := len(ps)
+		sort_index := make([]Post, 0)
+		for i := range ps {
 			sort_index = append(sort_index, ps[i])
 			num = num + 1
-			if num == 2 {
+			if num == 3 {
 				sort.Sort(ByODate(sort_index))
-				fmt.Println(sort_index)
+				if index == 1 {
+					prev = 0
+				} else {
+					prev = index -1
+				}
+				if (index * 3) < length && (length - index*3) > 3 {
+					next = index +1
+				} else {
+					next = 0
+				}
+				build_index(sort_index, index, prev, next)
+
 				sort_index = make([]Post, 0)
-				fmt.Println("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", index)
 				index = index + 1
 				num = 0
 
 			}
-		}*/
+		}
+		if len(sort_index) > 0 {
+			sort.Sort(ByODate(sort_index))
+			build_index(sort_index, 0, index-1, -1)
+		}
+	}
 
 }
