@@ -351,7 +351,8 @@ func get_conf()Configuration{
 
 func main() {
 
-	new_site := flag.Bool("new_site", false, "Creates a new site.")
+	new_site := flag.Bool("new_site", false, "Creates a new site in the current directory.")
+	newpost := flag.Bool("new", false, "Creates a new post.")
 	flag.Parse()
 
 	if *new_site {
@@ -359,6 +360,11 @@ func main() {
 		os.Exit(0)
 	}
 
+	if *newpost {
+		new_post()
+		os.Exit(0)
+	}
+	
 	conf := get_conf()
 	fmt.Println(conf)
 
