@@ -3,13 +3,31 @@
 	<title>{{ .Title }}</title>
 </head>
 <body>
-<ul>
-{{range .Tags}}
-    <li>{{ . }}</li>
-{{end}}
-</ul>
-<h1>{{ .Title }}</h1>
-{{ .Body  }}
+	<div class="container-fluid" id="container-fluid">
+    <!--Body content-->
+    <div class="row-fluid">
+    <div class="span2"></div>
+    <div class="span8">
+    
+    <div class="postbox">
+    <h1><a href="#">{{ .Title }}</a></h1>
+    <hr>
+    <small>
+        Posted: {{ .Date }}  |  
 
+
+        <a href="{{ .Slug }}.md">Source</a>
+              |  More posts about
+                {{range .Tags}}
+                <a href="../categories/{{ . }}.html"><span class="badge badge-info">{{ . }}</span></a>
+				{{end}}
+    </small>
+    <hr>
+
+	{{ .Body  }}
+	</div>
+    </div>
+	</div>
+	</div>
 </body>
 </html>
