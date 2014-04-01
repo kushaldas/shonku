@@ -322,6 +322,9 @@ func create_dirs(){
 	 if !exists("./output/") {
 		os.Mkdir("./output/", 0777)
 	 }
+	 if !exists("./posts/") {
+		os.Mkdir("./posts/", 0777)
+	 }
 
 }
 
@@ -357,6 +360,7 @@ func main() {
 	}
 
 	conf := get_conf()
+	fmt.Println(conf)
 
 
 	createdb()
