@@ -17,6 +17,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"flag"
 )
 
 type Article struct {
@@ -243,6 +244,9 @@ func build_post(ps Post) string {
 	return body
 }
 
+/*
+Creates index pages.
+*/
 func build_index(pss []Post, index, pre, next int) {
 	fmt.Println(index, pre, next)
 	var doc bytes.Buffer
@@ -288,7 +292,46 @@ func build_index(pss []Post, index, pre, next int) {
 	}
 }
 
+/*
+Checks for path.
+*/
+func exists(path string) bool {
+    _, err := os.Stat(path)
+    if err == nil { return true }
+    if os.IsNotExist(err) { return false }
+    return false
+}
+
+/*
+Creates the required directory structure.
+*/
+func create_dirs(){
+	 if !exists("./templates/") {
+		os.Mkdir("./templates/", 0777)
+	 }
+	 if !exists("./output/") {
+		os.Mkdir("./output/", 0777)
+	 }
+
+}
+
+/*
+Creates new site
+*/
+func create_site(){
+
+	create_dirs()
+}
+
 func main() {
+
+	new_site := flag.Bool("new_site", false, "Creates a new site.")
+	flag.Parse()
+
+	if *new_site {
+		create_site()
+		os.Exit(0)
+	}
 	createdb()
 	rebuild_index := false
 	ps := make([]Post, 0)
