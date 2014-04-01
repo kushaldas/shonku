@@ -18,7 +18,17 @@ import (
 	"strings"
 	"time"
 	"flag"
+	"encoding/json"
 )
+
+type Configuration struct {
+	Author 			string
+	Title 			string
+	URL 			string
+	Content_footer	string
+	Disqus			string
+
+}
 
 type Article struct {
 	Id   int
@@ -323,6 +333,19 @@ func create_site(){
 	create_dirs()
 }
 
+/*
+Reads and returns the configuration.
+*/
+func get_conf()Configuration{
+	file, _ := os.Open("conf.json")
+	decoder := json.NewDecoder(file)
+	//configuration := make(Configuration)
+	var configuration Configuration
+	decoder.Decode(&configuration)
+	return configuration
+}
+
+
 func main() {
 
 	new_site := flag.Bool("new_site", false, "Creates a new site.")
@@ -332,6 +355,10 @@ func main() {
 		create_site()
 		os.Exit(0)
 	}
+
+	conf := get_conf()
+
+
 	createdb()
 	rebuild_index := false
 	ps := make([]Post, 0)
