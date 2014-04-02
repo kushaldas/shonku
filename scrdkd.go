@@ -231,6 +231,60 @@ func get_time(text string) time.Time {
 
 }
 
+/*
+Creates the atom and rss feeds.
+*/
+func build_feeds(ps []Post) {
+	now := time.Now()
+	feed := &feeds.Feed{
+		Title:       "jmoiron.net blog",
+		Link:        &feeds.Link{Href: "http://jmoiron.net/blog"},
+		Description: "discussion about tech, footie, photos",
+		Author:      &feeds.Author{"Jason Moiron", "jmoiron@jmoiron.net"},
+		Created:     now,
+	}
+	items :=make([]*feeds.Item,0)
+	var item *feeds.Item
+	for i := range ps {
+		post := ps[i]
+		if post.Changed {
+			item = &feeds.Item{
+				Title:       post.Title,
+				Description: string(post.Body),
+				Created:     post.Date,
+				Updated:	 now,
+				Author:      &feeds.Author{"Jason Moiron", "jmoiron@jmoiron.net"},
+				Link:        &feeds.Link{Href: "http://jmoiron.net/blog/limiting-concurrency-in-go/"},
+			}
+			
+		} else { // Post not changed, so keeping same old date.
+			item = &feeds.Item{
+				Title:       post.Title,
+				Description: string(post.Body),
+				Created:     post.Date,
+				Updated:	 post.Date,
+				Author:      &feeds.Author{"Jason Moiron", "jmoiron@jmoiron.net"},
+				Link:        &feeds.Link{Href: "http://jmoiron.net/blog/limiting-concurrency-in-go/"},
+			}
+		}
+		items = append(items, item)
+	}
+
+	feed.Items = items
+	rss, err := feed.ToRss()
+	atom, err:= feed.ToAtom()
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		f, _ := os.Create("./output/rss.xml")
+		defer f.Close()
+		io.WriteString(f, rss)
+		f2, _ := os.Create("./output/atom.xml")
+		defer f2.Close()
+		io.WriteString(f2, atom)
+	}
+
+}
 
 /*
 Builds a post based on the template
@@ -432,6 +486,14 @@ func main() {
 
 		}
 
-
+		// Time to check for any change in 10 posts at max and rebuild rss feed if required.
+		var indexlist []Post
+		sort.Sort(ByDate(ps))
+		if len(ps) >= 10 {
+			indexlist = ps[:10]
+		} else {
+			indexlist = ps[:]
+		}
+		build_feeds(indexlist)
 	}
 }
