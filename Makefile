@@ -1,5 +1,5 @@
 all:
-	go build -o shonku.bin scrdkd.go posts.go
+	go build -o shonku.bin scrdkd.go posts.go bindata.go
 
 clean:
 	rm .scrdkd.db

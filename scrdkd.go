@@ -28,15 +28,15 @@ type Configuration struct {
 	URL            string
 	Content_footer string
 	Disqus         string
-	Email		   string
+	Email          string
 	Description    string
-	Logo 		   string
-	Links		   []PageLink
+	Logo           string
+	Links          []PageLink
 }
 
 type PageLink struct {
-	Link  string
-	Text  string
+	Link string
+	Text string
 }
 
 type Article struct {
@@ -52,7 +52,7 @@ type Post struct {
 	Date    time.Time
 	Tags    []string
 	Changed bool
-	Url 	string
+	Url     string
 }
 
 type Indexposts struct {
@@ -63,7 +63,7 @@ type Indexposts struct {
 	Previous  int
 	NextLast  bool
 	Logo      string
-	Links	  []PageLink
+	Links     []PageLink
 }
 
 var conf Configuration
@@ -258,7 +258,7 @@ func build_feeds(ps []Post, conf Configuration) {
 		Author:      &feeds.Author{conf.Author, conf.Email},
 		Created:     now,
 	}
-	items :=make([]*feeds.Item,0)
+	items := make([]*feeds.Item, 0)
 	var item *feeds.Item
 	for i := range ps {
 		post := ps[i]
@@ -267,17 +267,17 @@ func build_feeds(ps []Post, conf Configuration) {
 				Title:       post.Title,
 				Description: string(post.Body),
 				Created:     post.Date,
-				Updated:	 now,
+				Updated:     now,
 				Author:      &feeds.Author{conf.Author, conf.Email},
 				Link:        &feeds.Link{Href: post.Url},
 			}
-			
+
 		} else { // Post not changed, so keeping same old date.
 			item = &feeds.Item{
 				Title:       post.Title,
 				Description: string(post.Body),
 				Created:     post.Date,
-				Updated:	 post.Date,
+				Updated:     post.Date,
 				Author:      &feeds.Author{conf.Author, conf.Email},
 				Link:        &feeds.Link{Href: post.Url},
 			}
@@ -287,7 +287,7 @@ func build_feeds(ps []Post, conf Configuration) {
 
 	feed.Items = items
 	rss, err := feed.ToRss()
-	atom, err:= feed.ToAtom()
+	atom, err := feed.ToAtom()
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -402,6 +402,77 @@ func create_dirs() {
 	if !exists("./posts/") {
 		os.Mkdir("./posts/", 0777)
 	}
+	if !exists("./assets/css") {
+		os.MkdirAll("./assets/css", 0777)
+	}
+	if !exists("./assets/css/images/ie6") {
+		os.MkdirAll("./assets/css/images/ie6", 0777)
+	}
+	if !exists("./assets/js") {
+		os.Mkdir("./assets/js", 0777)
+	}
+	if !exists("./assets/img") {
+		os.Mkdir("./assets/img", 0777)
+	}
+	if !exists("./assets/img/icons") {
+		os.Mkdir("./assets/img/icons", 0777)
+	}
+}
+
+// Creates the static files for the theme.
+func create_theme_files() {
+	names := []string{
+		"assets/js/imagesloaded.pkgd.min.js",
+		"assets/js/slides.jquery.js",
+		"assets/js/flowr.plugin.js",
+		"assets/js/jquery-1.7.2.min.js",
+		"assets/js/jquery.colorbox-min.js",
+		"assets/js/bootstrap.js",
+		"assets/js/slides.min.jquery.js",
+		"assets/js/jquery-1.10.2.min.js",
+		"assets/js/bootstrap.min.js",
+		"assets/js/mathjax.js",
+
+		"assets/img/icons",
+		"assets/img/icons/twitter.png",
+		"assets/img/icons/rss.png",
+		"assets/img/icons/github.png",
+		"assets/img/glyphicons-halflings-white.png",
+		"assets/img/glyphicons-halflings.png",
+
+		"assets/css/theme.css",
+		"assets/css/code.css",
+		"assets/css/bootstrap-responsive.css",
+		"assets/css/slides.css",
+		"assets/css/bootstrap.css",
+		"assets/css/custom.css",
+		"assets/css/bootstrap.min.css",
+		"assets/css/rst.css",
+		"assets/css/bootstrap-responsive.min.css",
+
+		"assets/css/images/controls.png",
+		"assets/css/images/loading_background.png",
+
+		"assets/css/images/ie6/borderMiddleLeft.png",
+		"assets/css/images/ie6/borderBottomRight.png",
+		"assets/css/images/ie6/borderTopRight.png",
+		"assets/css/images/ie6/borderMiddleRight.png",
+		"assets/css/images/ie6/borderBottomLeft.png",
+		"assets/css/images/ie6/borderBottomCenter.png",
+		"assets/css/images/ie6/borderTopCenter.png",
+		"assets/css/images/ie6/borderTopLeft.png",
+		"assets/css/images/border.png",
+		"assets/css/images/overlay.png",
+		"assets/css/images/loading.gif",
+		"assets/css/style.css",
+		"assets/css/colorbox.css"}
+	for i := range names {
+		name := names[i]
+		data, _ := Asset(name)
+		f, _ := os.Create(name)
+		defer f.Close()
+		io.WriteString(f, string(data))
+	}
 
 }
 
@@ -411,6 +482,7 @@ Creates new site
 func create_site() {
 
 	create_dirs()
+	create_theme_files()
 }
 
 /*
@@ -489,7 +561,7 @@ func main() {
 				}
 				if (index*POSTN) < length && (length-index*POSTN) > POSTN {
 					next = index + 1
-				} else if (index*POSTN) == length {
+				} else if (index * POSTN) == length {
 					next = -1
 				} else {
 					next = 0
