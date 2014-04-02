@@ -7,7 +7,10 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/base64"
+	"encoding/json"
+	"flag"
 	"fmt"
+	"github.com/gorilla/feeds"
 	"github.com/russross/blackfriday"
 	"html/template"
 	"io"
@@ -17,17 +20,14 @@ import (
 	"sort"
 	"strings"
 	"time"
-	"flag"
-	"encoding/json"
 )
 
 type Configuration struct {
-	Author 			string
-	Title 			string
-	URL 			string
-	Content_footer	string
-	Disqus			string
-
+	Author         string
+	Title          string
+	URL            string
+	Content_footer string
+	Disqus         string
 }
 
 type Article struct {
@@ -37,22 +37,22 @@ type Article struct {
 }
 
 type Post struct {
-	Title string
-	Slug  string
-	Body  template.HTML
-	Date  time.Time
-	Tags  []string
+	Title   string
+	Slug    string
+	Body    template.HTML
+	Date    time.Time
+	Tags    []string
+	Changed bool
 }
 
 type Indexposts struct {
-	Posts []Post
-	NextF bool
+	Posts     []Post
+	NextF     bool
 	PreviousF bool
-	Next int
-	Previous int
-	NextLast bool
+	Next      int
+	Previous  int
+	NextLast  bool
 }
-
 
 type ByDate []Post
 
@@ -212,6 +212,7 @@ func read_post(filename string) Post {
 		p.Body = template.HTML(string(body))
 		p.Date = get_time(date)
 		p.Tags = tags
+		p.Changed = false
 
 	}
 	return p
@@ -229,6 +230,7 @@ func get_time(text string) time.Time {
 	return new_now
 
 }
+
 
 /*
 Builds a post based on the template
@@ -306,32 +308,36 @@ func build_index(pss []Post, index, pre, next int) {
 Checks for path.
 */
 func exists(path string) bool {
-    _, err := os.Stat(path)
-    if err == nil { return true }
-    if os.IsNotExist(err) { return false }
-    return false
+	_, err := os.Stat(path)
+	if err == nil {
+		return true
+	}
+	if os.IsNotExist(err) {
+		return false
+	}
+	return false
 }
 
 /*
 Creates the required directory structure.
 */
-func create_dirs(){
-	 if !exists("./templates/") {
+func create_dirs() {
+	if !exists("./templates/") {
 		os.Mkdir("./templates/", 0777)
-	 }
-	 if !exists("./output/") {
+	}
+	if !exists("./output/") {
 		os.Mkdir("./output/", 0777)
-	 }
-	 if !exists("./posts/") {
+	}
+	if !exists("./posts/") {
 		os.Mkdir("./posts/", 0777)
-	 }
+	}
 
 }
 
 /*
 Creates new site
 */
-func create_site(){
+func create_site() {
 
 	create_dirs()
 }
@@ -339,7 +345,7 @@ func create_site(){
 /*
 Reads and returns the configuration.
 */
-func get_conf()Configuration{
+func get_conf() Configuration {
 	file, _ := os.Open("conf.json")
 	decoder := json.NewDecoder(file)
 	//configuration := make(Configuration)
@@ -347,7 +353,6 @@ func get_conf()Configuration{
 	decoder.Decode(&configuration)
 	return configuration
 }
-
 
 func main() {
 
@@ -364,10 +369,9 @@ func main() {
 		new_post()
 		os.Exit(0)
 	}
-	
+
 	conf := get_conf()
 	fmt.Println(conf)
-
 
 	createdb()
 	rebuild_index := false
@@ -377,17 +381,20 @@ func main() {
 	for i := range names {
 		hash := create_hash(names[i])
 		post := read_post(names[i])
-		ps = append(ps, post)
 		if changed_ornot(names[i], hash) {
 			fmt.Println(names[i])
 			build_post(post)
 			rebuild_index = true
+			// Also mark that this post was changed on disk
+			post.Changed = true
 
 		}
+		ps = append(ps, post)
 	}
 
 	sort.Sort(ByODate(ps))
 
+	// If required then rebuild the primary indexe pages.
 	if rebuild_index == true {
 		var prev, next int
 		index := 1
@@ -402,10 +409,12 @@ func main() {
 				if index == 1 {
 					prev = 0
 				} else {
-					prev = index -1
+					prev = index - 1
 				}
-				if (index * 3) < length && (length - index*3) > 3 {
-					next = index +1
+				if (index*3) < length && (length-index*3) > 3 {
+					next = index + 1
+				} else if (index*3) == length {
+					next = -1
 				} else {
 					next = 0
 				}
@@ -420,7 +429,9 @@ func main() {
 		if len(sort_index) > 0 {
 			sort.Sort(ByODate(sort_index))
 			build_index(sort_index, 0, index-1, -1)
-		}
-	}
 
+		}
+
+
+	}
 }
