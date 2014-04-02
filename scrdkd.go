@@ -30,6 +30,13 @@ type Configuration struct {
 	Disqus         string
 	Email		   string
 	Description    string
+	Logo 		   string
+	Links		   []PageLink
+}
+
+type PageLink struct {
+	Link  string
+	Text  string
 }
 
 type Article struct {
@@ -55,7 +62,11 @@ type Indexposts struct {
 	Next      int
 	Previous  int
 	NextLast  bool
+	Logo      string
+	Links	  []PageLink
 }
+
+var conf Configuration
 
 type ByDate []Post
 
@@ -342,6 +353,8 @@ func build_index(pss []Post, index, pre, next int) {
 		ips.NextLast = true
 	}
 
+	ips.Links = conf.Links
+	ips.Logo = conf.Logo
 	tml, _ := template.ParseFiles("./templates/index.html")
 	err := tml.Execute(&doc, ips)
 	if err != nil {
@@ -408,7 +421,10 @@ func get_conf() Configuration {
 	decoder := json.NewDecoder(file)
 	//configuration := make(Configuration)
 	var configuration Configuration
-	decoder.Decode(&configuration)
+	err := decoder.Decode(&configuration)
+	if err != nil {
+		fmt.Println(err)
+	}
 	return configuration
 }
 
@@ -430,7 +446,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	conf := get_conf()
+	conf = get_conf()
 	fmt.Println(conf)
 
 	createdb()

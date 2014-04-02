@@ -4,9 +4,10 @@
 	"Title": "SITE TITLE",
 	"URL": "http://localhost/",
 	"Description": "Description of the site",
+	"Logo" : "URL for logo",
 	"Content_footer": "Copyright 2014",
 	"Email": "author@emai",
 	"Disqus": "",
-	"abds": "sadf"
+	"Links": [{"Link":"pages/aboutme.html", "Text": "About"}]
 
 }
