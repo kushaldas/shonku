@@ -410,6 +410,8 @@ func get_conf() Configuration {
 
 func main() {
 
+	POSTN := 3 // Magic number of posts in every index.
+
 	new_site := flag.Bool("new_site", false, "Creates a new site in the current directory.")
 	newpost := flag.Bool("new", false, "Creates a new post.")
 	flag.Parse()
@@ -458,16 +460,16 @@ func main() {
 		for i := range ps {
 			sort_index = append(sort_index, ps[i])
 			num = num + 1
-			if num == 3 {
+			if num == POSTN {
 				sort.Sort(ByODate(sort_index))
 				if index == 1 {
 					prev = 0
 				} else {
 					prev = index - 1
 				}
-				if (index*3) < length && (length-index*3) > 3 {
+				if (index*POSTN) < length && (length-index*POSTN) > POSTN {
 					next = index + 1
-				} else if (index*3) == length {
+				} else if (index*POSTN) == length {
 					next = -1
 				} else {
 					next = 0
