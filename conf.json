@@ -3,7 +3,9 @@
 	"Author": "SITE AUTHOR",
 	"Title": "SITE TITLE",
 	"URL": "http://localhost/",
+	"Description": "Description of the site",
 	"Content_footer": "Copyright 2014",
+	"Email": "author@emai",
 	"Disqus": "",
 	"abds": "sadf"
 

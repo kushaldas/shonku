@@ -28,6 +28,8 @@ type Configuration struct {
 	URL            string
 	Content_footer string
 	Disqus         string
+	Email		   string
+	Description    string
 }
 
 type Article struct {
@@ -43,6 +45,7 @@ type Post struct {
 	Date    time.Time
 	Tags    []string
 	Changed bool
+	Url 	string
 }
 
 type Indexposts struct {
@@ -166,7 +169,7 @@ func get_slug(s string) string {
 /*
 Reads a post and gets all details from it.
 */
-func read_post(filename string) Post {
+func read_post(filename string, conf Configuration) Post {
 	var buffer bytes.Buffer
 	var p Post
 	flag := false
@@ -213,6 +216,7 @@ func read_post(filename string) Post {
 		p.Date = get_time(date)
 		p.Tags = tags
 		p.Changed = false
+		p.Url = fmt.Sprintf("%sposts/%s.html", conf.URL, p.Slug)
 
 	}
 	return p
@@ -234,13 +238,13 @@ func get_time(text string) time.Time {
 /*
 Creates the atom and rss feeds.
 */
-func build_feeds(ps []Post) {
+func build_feeds(ps []Post, conf Configuration) {
 	now := time.Now()
 	feed := &feeds.Feed{
-		Title:       "jmoiron.net blog",
-		Link:        &feeds.Link{Href: "http://jmoiron.net/blog"},
-		Description: "discussion about tech, footie, photos",
-		Author:      &feeds.Author{"Jason Moiron", "jmoiron@jmoiron.net"},
+		Title:       conf.Title,
+		Link:        &feeds.Link{Href: conf.URL},
+		Description: conf.Description,
+		Author:      &feeds.Author{conf.Author, conf.Email},
 		Created:     now,
 	}
 	items :=make([]*feeds.Item,0)
@@ -253,8 +257,8 @@ func build_feeds(ps []Post) {
 				Description: string(post.Body),
 				Created:     post.Date,
 				Updated:	 now,
-				Author:      &feeds.Author{"Jason Moiron", "jmoiron@jmoiron.net"},
-				Link:        &feeds.Link{Href: "http://jmoiron.net/blog/limiting-concurrency-in-go/"},
+				Author:      &feeds.Author{conf.Author, conf.Email},
+				Link:        &feeds.Link{Href: post.Url},
 			}
 			
 		} else { // Post not changed, so keeping same old date.
@@ -263,8 +267,8 @@ func build_feeds(ps []Post) {
 				Description: string(post.Body),
 				Created:     post.Date,
 				Updated:	 post.Date,
-				Author:      &feeds.Author{"Jason Moiron", "jmoiron@jmoiron.net"},
-				Link:        &feeds.Link{Href: "http://jmoiron.net/blog/limiting-concurrency-in-go/"},
+				Author:      &feeds.Author{conf.Author, conf.Email},
+				Link:        &feeds.Link{Href: post.Url},
 			}
 		}
 		items = append(items, item)
@@ -436,7 +440,7 @@ func main() {
 	names := findfiles()
 	for i := range names {
 		hash := create_hash(names[i])
-		post := read_post(names[i])
+		post := read_post(names[i], conf)
 		if changed_ornot(names[i], hash) {
 			fmt.Println(names[i])
 			build_post(post)
@@ -496,6 +500,6 @@ func main() {
 		} else {
 			indexlist = ps[:]
 		}
-		build_feeds(indexlist)
+		build_feeds(indexlist, conf)
 	}
 }
