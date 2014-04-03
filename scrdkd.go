@@ -69,6 +69,7 @@ type Indexposts struct {
 }
 
 var conf Configuration
+var POSTN int
 
 type ByDate []Post
 
@@ -509,12 +510,96 @@ func get_conf() Configuration {
 	return configuration
 }
 
+/*
+This rebuilds the whole site.
+Any chnage to the configuration file will force this.
+*/
+func site_rebuild(){
+	
+	rebuild := true
+	rebuild_index := true
+	ps := make([]Post, 0)
+	//sort_index := make([]Post, 0)
+	names := findfiles()
+	for i := range names {
+		hash := create_hash(names[i])
+		post := read_post(names[i], conf)
+		if rebuild || changed_ornot(names[i], hash){
+			fmt.Println(names[i])
+			build_post(post)
+			rebuild_index = true
+			// Also mark that this post was changed on disk
+			post.Changed = true
+
+		}
+		ps = append(ps, post)
+	}
+
+	sort.Sort(ByODate(ps))
+
+	// If required then rebuild the primary indexe pages.
+	if rebuild_index == true {
+		var prev, next int
+		index := 1
+		num := 0
+		length := len(ps)
+		sort_index := make([]Post, 0)
+		for i := range ps {
+			sort_index = append(sort_index, ps[i])
+			num = num + 1
+			if num == POSTN {
+				sort.Sort(ByODate(sort_index))
+				if index == 1 {
+					prev = 0
+				} else {
+					prev = index - 1
+				}
+				if (index*POSTN) < length && (length-index*POSTN) > POSTN {
+					next = index + 1
+				} else if (index * POSTN) == length {
+					next = -1
+				} else {
+					next = 0
+				}
+				build_index(sort_index, index, prev, next)
+
+				sort_index = make([]Post, 0)
+				index = index + 1
+				num = 0
+
+			}
+		}
+		if len(sort_index) > 0 {
+			sort.Sort(ByODate(sort_index))
+			build_index(sort_index, 0, index-1, -1)
+
+		}
+
+		// Time to check for any change in 10 posts at max and rebuild rss feed if required.
+		var indexlist []Post
+		sort.Sort(ByDate(ps))
+		if len(ps) >= 10 {
+			indexlist = ps[:10]
+		} else {
+			indexlist = ps[:]
+		}
+		build_feeds(indexlist, conf)
+
+		//Next we have to copy all assets if changed.
+		//Now we will just delete and copy again.
+		os.RemoveAll("./output/assets")
+		CopyDir("./assets", "./output/assets") 
+	}
+}
+
+
 func main() {
 
-	POSTN := 3 // Magic number of posts in every index.
+	POSTN = 3 // Magic number of posts in every index.
 
 	new_site := flag.Bool("new_site", false, "Creates a new site in the current directory.")
 	newpost := flag.Bool("new", false, "Creates a new post.")
+	force := flag.Bool("force", false, "Force rebuilding of the whole site.")
 	flag.Parse()
 
 	if *new_site {
@@ -526,6 +611,12 @@ func main() {
 		new_post()
 		os.Exit(0)
 	}
+
+	if *force {
+		site_rebuild()
+		os.Exit(0)
+	}
+
 
 	conf = get_conf()
 	fmt.Println(conf)
