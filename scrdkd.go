@@ -465,7 +465,9 @@ func create_theme_files() {
 		"assets/css/images/overlay.png",
 		"assets/css/images/loading.gif",
 		"assets/css/style.css",
-		"assets/css/colorbox.css"}
+		"assets/css/colorbox.css",
+		"templates/index.html",
+		"templates/post.html"}
 	for i := range names {
 		name := names[i]
 		data, _ := Asset(name)
@@ -589,5 +591,10 @@ func main() {
 			indexlist = ps[:]
 		}
 		build_feeds(indexlist, conf)
+
+		//Next we have to copy all assets if changed.
+		//Now we will just delete and copy again.
+		os.RemoveAll("./output/assets")
+		CopyDir("./assets", "./output/assets") 
 	}
 }
