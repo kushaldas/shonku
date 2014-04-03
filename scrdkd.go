@@ -53,6 +53,8 @@ type Post struct {
 	Tags    []string
 	Changed bool
 	Url     string
+	Logo    string
+	Links     []PageLink
 }
 
 type Indexposts struct {
@@ -228,6 +230,8 @@ func read_post(filename string, conf Configuration) Post {
 		p.Tags = tags
 		p.Changed = false
 		p.Url = fmt.Sprintf("%sposts/%s.html", conf.URL, p.Slug)
+		p.Logo = conf.Logo
+		p.Links = conf.Links
 
 	}
 	return p
