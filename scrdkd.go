@@ -313,7 +313,7 @@ func build_post(ps Post) string {
 		fmt.Println(err)
 	}
 	body = doc.String()
-	name := "./output/" + ps.Slug + ".html"
+	name := "./output/posts/" + ps.Slug + ".html"
 	f, err := os.Create(name)
 	defer f.Close()
 	n, err := io.WriteString(f, body)
