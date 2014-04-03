@@ -39,6 +39,7 @@ type PageLink struct {
 	Text string
 }
 
+
 type Article struct {
 	Id   int
 	Path string
@@ -54,6 +55,12 @@ type Post struct {
 	Changed bool
 	Url     string
 	Logo    string
+	Links     []PageLink
+}
+
+type Catpage struct {
+	Cats 	map[string]string
+	Logo      string
 	Links     []PageLink
 }
 
@@ -514,17 +521,52 @@ func get_conf() Configuration {
 }
 
 /*
+Builds the categories pages and indexes
+*/
+func build_categories(cat Catpage) {
+	var doc bytes.Buffer
+	var body string
+	tml, _ := template.ParseFiles("./templates/category-index.html")
+	err := tml.Execute(&doc, cat)
+	if err != nil {
+		fmt.Println(err)
+	}
+	body = doc.String()
+	name := "./output/categories/index.html"
+	f, err := os.Create(name)
+	defer f.Close()
+	n, err := io.WriteString(f, body)
+
+	if err != nil {
+		fmt.Println(n, err)
+	}
+}
+
+/*
 This rebuilds the whole site.
 Any chnage to the configuration file will force this.
 */
 func site_rebuild(rebuild, rebuild_index bool){
 	
 	ps := make([]Post, 0)
-	//sort_index := make([]Post, 0)
+	
+	catslinks := make(map[string][]Post, 0)
+	
+	catnames := make(map[string]string, 0)
+
+
 	names := findfiles()
 	for i := range names {
 		hash := create_hash(names[i])
 		post := read_post(names[i], conf)
+			
+		for i := range post.Tags {
+			name := post.Tags[i]
+			catslug := get_slug(name)
+			catnames[catslug] = name
+			catslinks[catslug] = append(catslinks[catslug], post)
+		}
+
 		if rebuild || changed_ornot(names[i], hash){
 			fmt.Println(names[i])
 			build_post(post)
@@ -535,6 +577,9 @@ func site_rebuild(rebuild, rebuild_index bool){
 		}
 		ps = append(ps, post)
 	}
+
+	cat := Catpage{Cats: catnames, Links: conf.Links, Logo: conf.Logo}
+	build_categories(cat)
 
 	sort.Sort(ByODate(ps))
 
