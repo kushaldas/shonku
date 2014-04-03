@@ -399,6 +399,9 @@ func create_dirs() {
 	if !exists("./output/") {
 		os.Mkdir("./output/", 0777)
 	}
+	if !exists("./output/posts/") {
+		os.Mkdir("./output/posts/", 0777)
+	}
 	if !exists("./posts/") {
 		os.Mkdir("./posts/", 0777)
 	}
