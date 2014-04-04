@@ -1,2 +1,3 @@
 *.bin
 .scrdkd.db
+_build/*
