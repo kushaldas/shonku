@@ -652,6 +652,8 @@ func main() {
 		create_site()
 		os.Exit(0)
 	}
+	
+	conf = get_conf()
 
 	if *newpost {
 		new_post()
@@ -664,7 +666,7 @@ func main() {
 	}
 
 
-	conf = get_conf()
+
 	fmt.Println(conf)
 
 	createdb()
