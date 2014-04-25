@@ -39,7 +39,6 @@ type PageLink struct {
 	Text string
 }
 
-
 type Article struct {
 	Id   int
 	Path string
@@ -55,13 +54,13 @@ type Post struct {
 	Changed bool
 	Url     string
 	Logo    string
-	Links     []PageLink
+	Links   []PageLink
 }
 
 type Catpage struct {
-	Cats 	map[string]string
-	Logo      string
-	Links     []PageLink
+	Cats  map[string]string
+	Logo  string
+	Links []PageLink
 }
 
 type Indexposts struct {
@@ -340,7 +339,7 @@ func build_post(ps Post) string {
 /*
 Creates index pages.
 */
-func build_index(pss []Post, index, pre, next int) {
+func build_index(pss []Post, index, pre, next int, indexname string) {
 	fmt.Println(index, pre, next)
 	var doc bytes.Buffer
 	var body, name string
@@ -374,9 +373,9 @@ func build_index(pss []Post, index, pre, next int) {
 	}
 	body = doc.String()
 	if next == -1 {
-		name = "./output/index.html"
+		name = fmt.Sprintf("./output/%s.html", indexname)
 	} else {
-		name = fmt.Sprintf("./output/index-%d.html", index)
+		name = fmt.Sprintf("./output/%s-%d.html", indexname, index)
 	}
 	f, err := os.Create(name)
 	defer f.Close()
@@ -543,23 +542,63 @@ func build_categories(cat Catpage) {
 }
 
 /*
+Creates the index pages as required.
+*/
+func create_index_files(ps []Post, indexname string) {
+	var prev, next int
+	index := 1
+	num := 0
+	length := len(ps)
+	sort_index := make([]Post, 0)
+	for i := range ps {
+		sort_index = append(sort_index, ps[i])
+		num = num + 1
+		if num == POSTN {
+			sort.Sort(ByODate(sort_index))
+			if index == 1 {
+				prev = 0
+			} else {
+				prev = index - 1
+			}
+			if (index*POSTN) < length && (length-index*POSTN) > POSTN {
+				next = index + 1
+			} else if (index * POSTN) == length {
+				next = -1
+			} else {
+				next = 0
+			}
+			build_index(sort_index, index, prev, next, indexname)
+
+			sort_index = make([]Post, 0)
+			index = index + 1
+			num = 0
+
+		}
+	}
+	if len(sort_index) > 0 {
+		sort.Sort(ByODate(sort_index))
+		build_index(sort_index, 0, index-1, -1, indexname)
+
+	}
+}
+
+/*
 This rebuilds the whole site.
 Any chnage to the configuration file will force this.
 */
-func site_rebuild(rebuild, rebuild_index bool){
-	
-	ps := make([]Post, 0)
-	
-	catslinks := make(map[string][]Post, 0)
-	
-	catnames := make(map[string]string, 0)
+func site_rebuild(rebuild, rebuild_index bool) {
 
+	ps := make([]Post, 0)
+
+	catslinks := make(map[string][]Post, 0)
+
+	catnames := make(map[string]string, 0)
 
 	names := findfiles()
 	for i := range names {
 		hash := create_hash(names[i])
 		post := read_post(names[i], conf)
-			
+
 		for i := range post.Tags {
 			name := post.Tags[i]
 			catslug := get_slug(name)
@@ -567,7 +606,7 @@ func site_rebuild(rebuild, rebuild_index bool){
 			catslinks[catslug] = append(catslinks[catslug], post)
 		}
 
-		if rebuild || changed_ornot(names[i], hash){
+		if rebuild || changed_ornot(names[i], hash) {
 			fmt.Println(names[i])
 			build_post(post)
 			rebuild_index = true
@@ -585,42 +624,7 @@ func site_rebuild(rebuild, rebuild_index bool){
 
 	// If required then rebuild the primary indexe pages.
 	if rebuild_index == true {
-		var prev, next int
-		index := 1
-		num := 0
-		length := len(ps)
-		sort_index := make([]Post, 0)
-		for i := range ps {
-			sort_index = append(sort_index, ps[i])
-			num = num + 1
-			if num == POSTN {
-				sort.Sort(ByODate(sort_index))
-				if index == 1 {
-					prev = 0
-				} else {
-					prev = index - 1
-				}
-				if (index*POSTN) < length && (length-index*POSTN) > POSTN {
-					next = index + 1
-				} else if (index * POSTN) == length {
-					next = -1
-				} else {
-					next = 0
-				}
-				build_index(sort_index, index, prev, next)
-
-				sort_index = make([]Post, 0)
-				index = index + 1
-				num = 0
-
-			}
-		}
-		if len(sort_index) > 0 {
-			sort.Sort(ByODate(sort_index))
-			build_index(sort_index, 0, index-1, -1)
-
-		}
-
+		create_index_files(ps, "index")
 		// Time to check for any change in 10 posts at max and rebuild rss feed if required.
 		var indexlist []Post
 		sort.Sort(ByDate(ps))
@@ -634,10 +638,9 @@ func site_rebuild(rebuild, rebuild_index bool){
 		//Next we have to copy all assets if changed.
 		//Now we will just delete and copy again.
 		os.RemoveAll("./output/assets")
-		CopyDir("./assets", "./output/assets") 
+		CopyDir("./assets", "./output/assets")
 	}
 }
-
 
 func main() {
 
@@ -652,7 +655,7 @@ func main() {
 		create_site()
 		os.Exit(0)
 	}
-	
+
 	conf = get_conf()
 
 	if *newpost {
@@ -664,8 +667,6 @@ func main() {
 		site_rebuild(true, true)
 		os.Exit(0)
 	}
-
-
 
 	fmt.Println(conf)
 
