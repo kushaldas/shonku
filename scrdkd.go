@@ -17,6 +17,8 @@ import (
 	"io/ioutil"
 	"net/url"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -636,10 +638,17 @@ func site_rebuild(rebuild, rebuild_index bool) {
 		}
 		build_feeds(indexlist, conf)
 
-		//Next we have to copy all assets if changed.
-		//Now we will just delete and copy again.
-		os.RemoveAll("./output/assets")
-		CopyDir("./assets", "./output/assets")
+		// We are using system installed rsync for this.
+		curpath, _ := filepath.Abs(".")
+		frompath := curpath + "/assets/"
+		topath := curpath + "/output/assets/"
+		cmd := exec.Command("rsync", "-avz", frompath, topath)
+		var out bytes.Buffer
+		cmd.Stdout = &out
+		err := cmd.Run()
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 }
 
