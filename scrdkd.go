@@ -176,7 +176,8 @@ func changed_ornot(filename, hash string) bool {
 
 /*
 Returns the slug of the article
-TODO:
+TODO: We need a replacement for
+http://code.activestate.com/recipes/577257-slugify-make-a-string-usable-in-a-url-or-filename/
 We need to improve this function much more.
 */
 func get_slug(s string) string {
@@ -232,7 +233,9 @@ func read_post(filename string, conf Configuration) Post {
 		}
 
 		p.Title = title
-		p.Slug = get_slug(title)
+		slug := filepath.Base(filename)
+		length := len(slug)
+		p.Slug = slug[:length-3]
 		body := blackfriday.MarkdownCommon(buffer.Bytes())
 		p.Body = template.HTML(string(body))
 		p.Date = get_time(date)
@@ -654,7 +657,7 @@ func site_rebuild(rebuild, rebuild_index bool) {
 
 func main() {
 
-	POSTN = 3 // Magic number of posts in every index.
+	POSTN = 10 // Magic number of posts in every index.
 
 	new_site := flag.Bool("new_site", false, "Creates a new site in the current directory.")
 	newpost := flag.Bool("new", false, "Creates a new post.")
