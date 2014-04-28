@@ -265,7 +265,7 @@ func get_time(text string) time.Time {
 /*
 Creates the atom and rss feeds.
 */
-func build_feeds(ps []Post, conf Configuration) {
+func build_feeds(ps []Post, conf Configuration, name string) {
 	now := time.Now()
 	feed := &feeds.Feed{
 		Title:       conf.Title,
@@ -307,12 +307,18 @@ func build_feeds(ps []Post, conf Configuration) {
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		f, _ := os.Create("./output/rss.xml")
-		defer f.Close()
-		io.WriteString(f, rss)
-		f2, _ := os.Create("./output/atom.xml")
-		defer f2.Close()
-		io.WriteString(f2, atom)
+		if name == "cmain" {
+			f, _ := os.Create("./output/rss.xml")
+			defer f.Close()
+			io.WriteString(f, rss)
+			f2, _ := os.Create("./output/atom.xml")
+			defer f2.Close()
+			io.WriteString(f2, atom)
+		} else {
+			f, _ := os.Create("./output/categories/" + name + ".xml")
+			defer f.Close()
+			io.WriteString(f, rss)
+		}
 	}
 
 }
@@ -596,6 +602,7 @@ func site_rebuild(rebuild, rebuild_index bool) {
 
 	ps := make([]Post, 0)
 
+	cat_needs_build := make(map[string]bool, 0)
 	catslinks := make(map[string][]Post, 0)
 
 	catnames := make(map[string]string, 0)
@@ -619,6 +626,13 @@ func site_rebuild(rebuild, rebuild_index bool) {
 			// Also mark that this post was changed on disk
 			post.Changed = true
 
+			//Mark all categories need to be rebuild
+			for i := range post.Tags {
+				name := post.Tags[i]
+				catslug := get_slug(name)
+				cat_needs_build[catslug] = true
+			}
+
 		}
 		ps = append(ps, post)
 	}
@@ -639,7 +653,7 @@ func site_rebuild(rebuild, rebuild_index bool) {
 		} else {
 			indexlist = ps[:]
 		}
-		build_feeds(indexlist, conf)
+		build_feeds(indexlist, conf, "cmain")
 
 		// We are using system installed rsync for this.
 		curpath, _ := filepath.Abs(".")
