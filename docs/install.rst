@@ -40,3 +40,17 @@ Building the source
     $ make
 
 This should create a binary called `shonku.bin`.
+
+Rebuilding bindata for default theme
+=====================================
+
+In case you make any changes to the default theme, you want those changes inside
+the binary file also. For that issue the following command before building the
+binary.
+
+::
+
+	$ go-bindata assets/... templates/
+	
+.. note::
+	Remember to install go-bindata from `here <https://github.com/jteeuwen/go-bindata>`_.
