@@ -384,9 +384,17 @@ func build_index(pss []Post, index, pre, next int, indexname string) {
 	}
 	body = doc.String()
 	if next == -1 {
-		name = fmt.Sprintf("./output/%s.html", indexname)
+		if indexname == "index" {
+			name = fmt.Sprintf("./output/%s.html", indexname)
+		} else {
+			name = fmt.Sprintf("./output/categories/%s.html", indexname)
+		}
 	} else {
-		name = fmt.Sprintf("./output/%s-%d.html", indexname, index)
+		if indexname == "index" {
+			name = fmt.Sprintf("./output/%s-%d.html", indexname, index)
+		} else {
+			name = fmt.Sprintf("./output/categories/%s-%d.html", indexname, index)
+		}
 	}
 	f, err := os.Create(name)
 	defer f.Close()
@@ -640,9 +648,14 @@ func site_rebuild(rebuild, rebuild_index bool) {
 	cat := Catpage{Cats: catnames, Links: conf.Links, Logo: conf.Logo}
 	build_categories(cat)
 
+	//Now create index(s) for categories.
+	for k, _ := range cat_needs_build {
+		create_index_files(catslinks[k], k)
+	}
+
 	sort.Sort(ByODate(ps))
 
-	// If required then rebuild the primary indexe pages.
+	// If required then rebuild the primary index pages.
 	if rebuild_index == true {
 		create_index_files(ps, "index")
 		// Time to check for any change in 10 posts at max and rebuild rss feed if required.
