@@ -20,6 +20,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -61,6 +62,12 @@ type Post struct {
 
 type Catpage struct {
 	Cats  map[string]string
+	Logo  string
+	Links []PageLink
+}
+
+type Archivepage struct {
+	Years []string
 	Logo  string
 	Links []PageLink
 }
@@ -573,6 +580,35 @@ func build_categories(cat Catpage) {
 	}
 }
 
+func create_archive(years map[string]bool) {
+	yearslist := make([]string, 0)
+	for k, _ := range years {
+		yearslist = append(yearslist, k)
+	}
+	sort.Sort(sort.Reverse(sort.StringSlice(yearslist)))
+	archive := Archivepage{Years: yearslist, Links: conf.Links, Logo: conf.Logo}
+
+	var doc bytes.Buffer
+	var body string
+	tml, err := template.ParseFiles("./templates/archive.html", "./templates/base.html")
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = tml.ExecuteTemplate(&doc, "base", archive)
+	if err != nil {
+		fmt.Println(err)
+	}
+	body = doc.String()
+	name := "./output/archive.html"
+	f, err := os.Create(name)
+	defer f.Close()
+	n, err := io.WriteString(f, body)
+
+	if err != nil {
+		fmt.Println(n, err)
+	}
+}
+
 /*
 Creates the index pages as required.
 */
@@ -626,12 +662,14 @@ func site_rebuild(rebuild, rebuild_index bool) {
 	catslinks := make(map[string][]Post, 0)
 
 	catnames := make(map[string]string, 0)
-
+	pageyears := make(map[string]bool, 0)
 	names := findfiles()
 	for i := range names {
 		hash := create_hash(names[i])
 		post := read_post(names[i], conf)
-
+		//Mark the date of the post.
+		postdate := strconv.Itoa(post.Date.Year())
+		pageyears[postdate] = true
 		for i := range post.Tags {
 			name := post.Tags[i]
 			catslug := get_slug(name)
@@ -673,6 +711,9 @@ func site_rebuild(rebuild, rebuild_index bool) {
 		}
 		build_feeds(indexlist, conf, k)
 	}
+
+	// Now let us create the archive pages.
+	create_archive(pageyears)
 
 	sort.Sort(ByODate(ps))
 

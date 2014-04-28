@@ -9,6 +9,7 @@
 	"Email": "author@email",
 	"Disqus": "",
 	"Links": [{"Link":"/pages/aboutme.html", "Text": "About"},
-			{"Link":"/categories/", "Text":"Categories"}]
+			{"Link":"/categories/", "Text":"Categories"},
+			{"Link":"/archive.html", "Text":"Archive"}]
 
 }
