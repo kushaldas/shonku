@@ -74,6 +74,7 @@ type Indexposts struct {
 	NextLast  bool
 	Logo      string
 	Links     []PageLink
+	Main      bool
 }
 
 var conf Configuration
@@ -329,8 +330,8 @@ Builds a post based on the template
 func build_post(ps Post) string {
 	var doc bytes.Buffer
 	var body string
-	tml, _ := template.ParseFiles("./templates/post.html")
-	err := tml.Execute(&doc, ps)
+	tml, _ := template.ParseFiles("./templates/post.html", "./templates/base.html")
+	err := tml.ExecuteTemplate(&doc, "base", ps)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -377,8 +378,16 @@ func build_index(pss []Post, index, pre, next int, indexname string) {
 
 	ips.Links = conf.Links
 	ips.Logo = conf.Logo
-	tml, _ := template.ParseFiles("./templates/index.html")
-	err := tml.Execute(&doc, ips)
+	if indexname == "index" {
+		ips.Main = true
+	} else {
+		ips.Main = false
+	}
+	tml, err := template.ParseFiles("./templates/index.html", "./templates/base.html")
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = tml.ExecuteTemplate(&doc, "base", ips)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -545,8 +554,11 @@ Builds the categories pages and indexes
 func build_categories(cat Catpage) {
 	var doc bytes.Buffer
 	var body string
-	tml, _ := template.ParseFiles("./templates/category-index.html")
-	err := tml.Execute(&doc, cat)
+	tml, err := template.ParseFiles("./templates/category-index.html", "./templates/base.html")
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = tml.ExecuteTemplate(&doc, "base", cat)
 	if err != nil {
 		fmt.Println(err)
 	}
