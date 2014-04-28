@@ -607,7 +607,7 @@ This rebuilds the whole site.
 Any chnage to the configuration file will force this.
 */
 func site_rebuild(rebuild, rebuild_index bool) {
-
+	var indexlist []Post
 	ps := make([]Post, 0)
 
 	cat_needs_build := make(map[string]bool, 0)
@@ -650,7 +650,16 @@ func site_rebuild(rebuild, rebuild_index bool) {
 
 	//Now create index(s) for categories.
 	for k, _ := range cat_needs_build {
-		create_index_files(catslinks[k], k)
+		localps := catslinks[k]
+		create_index_files(localps, k)
+		//Now build the feeds as required.
+		sort.Sort(ByDate(localps))
+		if len(localps) >= 10 {
+			indexlist = localps[:10]
+		} else {
+			indexlist = localps[:]
+		}
+		build_feeds(indexlist, conf, k)
 	}
 
 	sort.Sort(ByODate(ps))
@@ -659,7 +668,7 @@ func site_rebuild(rebuild, rebuild_index bool) {
 	if rebuild_index == true {
 		create_index_files(ps, "index")
 		// Time to check for any change in 10 posts at max and rebuild rss feed if required.
-		var indexlist []Post
+
 		sort.Sort(ByDate(ps))
 		if len(ps) >= 10 {
 			indexlist = ps[:10]
