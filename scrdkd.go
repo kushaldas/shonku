@@ -560,7 +560,7 @@ func create_index_files(ps []Post, indexname string) {
 		sort_index = append(sort_index, ps[i])
 		num = num + 1
 		if num == POSTN {
-			sort.Sort(ByODate(sort_index))
+			sort.Sort(ByDate(sort_index))
 			if index == 1 {
 				prev = 0
 			} else {
@@ -582,7 +582,7 @@ func create_index_files(ps []Post, indexname string) {
 		}
 	}
 	if len(sort_index) > 0 {
-		sort.Sort(ByODate(sort_index))
+		sort.Sort(ByDate(sort_index))
 		build_index(sort_index, 0, index-1, -1, indexname)
 
 	}
