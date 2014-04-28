@@ -6,8 +6,9 @@
 	"Description": "Description of the site",
 	"Logo" : "URL for logo",
 	"Content_footer": "Copyright 2014",
-	"Email": "author@emai",
+	"Email": "author@email",
 	"Disqus": "",
-	"Links": [{"Link":"pages/aboutme.html", "Text": "About"}]
+	"Links": [{"Link":"/pages/aboutme.html", "Text": "About"},
+			{"Link":"/categories/", "Text":"Categories"}]
 
 }
