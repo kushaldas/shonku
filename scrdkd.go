@@ -463,11 +463,17 @@ func create_dirs() {
 	if !exists("./output/posts/") {
 		os.Mkdir("./output/posts/", 0777)
 	}
+	if !exists("./output/pages/") {
+		os.Mkdir("./output/posts/", 0777)
+	}
 	if !exists("./output/categories/") {
 		os.MkdirAll("./output/categories/", 0777)
 	}
 	if !exists("./posts/") {
 		os.Mkdir("./posts/", 0777)
+	}
+	if !exists("./pages/") {
+		os.Mkdir("./pages/", 0777)
 	}
 	if !exists("./assets/css") {
 		os.MkdirAll("./assets/css", 0777)
