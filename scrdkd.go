@@ -61,7 +61,7 @@ type Post struct {
 	Slug    string
 	Body    template.HTML
 	Date    time.Time
-	Tags    []string
+	Tags    map[string]string
 	Changed bool
 	Url     string
 	Logo    string
@@ -249,10 +249,10 @@ func read_post(filename string, conf Configuration) Post {
 		date := dateline[5:]
 		date = strings.TrimSpace(date)
 		tagsnonstripped := strings.Split(tagline[5:], ",")
-		tags := make([]string, 0)
+		tags := make(map[string]string, 0)
 		for i := range tagsnonstripped {
 			word := strings.TrimSpace(tagsnonstripped[i])
-			tags = append(tags, word)
+			tags[get_slug(word)] = word
 		}
 
 		p.Title = title
@@ -631,7 +631,8 @@ func create_archive(years map[string][]Post) {
 		sort.Sort(ByDate(posts))
 		for i := range posts {
 			p := posts[i]
-			ps = append(ps, ArchiveLink{Time_str: p.Date.Format("[2006-01-02 15:04:05]"), Url: p.Url,
+			ps = append(ps, ArchiveLink{Time_str: p.Date.Format("[2006-01-02 15:04:05]"),
+				Url:  fmt.Sprintf("/posts/%s.html", p.Slug),
 				Text: p.Title})
 		}
 		ar := Archivelist{Year: k, ArLinks: ps, Logo: conf.Logo, Links: conf.Links}
@@ -717,11 +718,9 @@ func site_rebuild(rebuild, rebuild_index bool) {
 		//Mark the date of the post.
 		postdate := strconv.Itoa(post.Date.Year())
 		pageyears[postdate] = append(pageyears[postdate], post)
-		for i := range post.Tags {
-			name := post.Tags[i]
-			catslug := get_slug(name)
-			catnames[catslug] = name
-			catslinks[catslug] = append(catslinks[catslug], post)
+		for k, v := range post.Tags {
+			catnames[k] = v
+			catslinks[k] = append(catslinks[k], post)
 		}
 
 		if rebuild || changed_ornot(names[i], hash) {

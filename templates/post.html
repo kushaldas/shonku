@@ -24,8 +24,8 @@
 
         <a href="{{ .Slug }}.md">Source</a>
               |  More posts about
-                {{range .Tags}}
-                <a href="../categories/{{ . }}.html"><span class="badge badge-info">{{ . }}</span></a>
+                {{range $k,$v := .Tags}}
+                <a href="../categories/{{ $k }}.html"><span class="badge badge-info">{{ $v }}</span></a>
 				{{end}}
     </small>
     <hr>
