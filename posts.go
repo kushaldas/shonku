@@ -33,6 +33,28 @@ func new_post() {
 
 }
 
+func new_page() {
+	const longform = "2006-01-02 15:04:05.999999999 -0700 MST"
+	var title string
+	fmt.Print("Enter the title of the page: ")
+	in := bufio.NewReader(os.Stdin)
+	title, _ = in.ReadString('\n')
+	title = strings.TrimSpace(title)
+	slug := get_slug(title)
+	name := "./pages/" + slug + ".md"
+	f, err := os.Create(name)
+	defer f.Close()
+	if err == nil {
+		f.WriteString("title: " + title + "\n")
+		t := time.Now()
+		f.WriteString("date: " + t.Format(longform) + "\n")
+		f.WriteString("====\n\n")
+		fmt.Println("Your new page is ready at " + name)
+
+	}
+
+}
+
 // Copies file source to destination dest.
 func CopyFile(source string, dest string) (err error) {
 	sf, err := os.Open(source)

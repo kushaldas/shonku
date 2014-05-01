@@ -464,7 +464,7 @@ func create_dirs() {
 		os.Mkdir("./output/posts/", 0777)
 	}
 	if !exists("./output/pages/") {
-		os.Mkdir("./output/posts/", 0777)
+		os.Mkdir("./output/pages/", 0777)
 	}
 	if !exists("./output/categories/") {
 		os.MkdirAll("./output/categories/", 0777)
@@ -802,6 +802,7 @@ func main() {
 
 	new_site := flag.Bool("new_site", false, "Creates a new site in the current directory.")
 	newpost := flag.Bool("new", false, "Creates a new post.")
+	newpage := flag.Bool("new_page", false, "Creates a new page.")
 	force := flag.Bool("force", false, "Force rebuilding of the whole site.")
 	flag.Parse()
 
@@ -814,6 +815,11 @@ func main() {
 
 	if *newpost {
 		new_post()
+		os.Exit(0)
+	}
+
+	if *newpage {
+		new_page()
 		os.Exit(0)
 	}
 
