@@ -48,7 +48,7 @@ func new_page() {
 		f.WriteString("title: " + title + "\n")
 		t := time.Now()
 		f.WriteString("date: " + t.Format(longform) + "\n")
-		f.WriteString("====\n\n")
+		f.WriteString("tags: Blog\n====\n\n")
 		fmt.Println("Your new page is ready at " + name)
 
 	}
