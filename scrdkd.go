@@ -25,6 +25,8 @@ import (
 	"time"
 )
 
+// All structures below are required for rendering different webpages.
+
 type Configuration struct {
 	Author         string
 	Title          string
@@ -40,6 +42,12 @@ type Configuration struct {
 type PageLink struct {
 	Link string
 	Text string
+}
+
+type ArchiveLink struct {
+	Time_str string
+	Url      string
+	Text     string
 }
 
 type Article struct {
@@ -70,6 +78,13 @@ type Archivepage struct {
 	Years []string
 	Logo  string
 	Links []PageLink
+}
+
+type Archivelist struct {
+	Year    string
+	ArLinks []ArchiveLink
+	Logo    string
+	Links   []PageLink
 }
 
 type Indexposts struct {
@@ -580,7 +595,7 @@ func build_categories(cat Catpage) {
 	}
 }
 
-func create_archive(years map[string]bool) {
+func create_archive(years map[string][]Post) {
 	yearslist := make([]string, 0)
 	for k, _ := range years {
 		yearslist = append(yearslist, k)
@@ -588,6 +603,7 @@ func create_archive(years map[string]bool) {
 	sort.Sort(sort.Reverse(sort.StringSlice(yearslist)))
 	archive := Archivepage{Years: yearslist, Links: conf.Links, Logo: conf.Logo}
 
+	//First create the archive index page.
 	var doc bytes.Buffer
 	var body string
 	tml, err := template.ParseFiles("./templates/archive.html", "./templates/base.html")
@@ -601,11 +617,42 @@ func create_archive(years map[string]bool) {
 	body = doc.String()
 	name := "./output/archive.html"
 	f, err := os.Create(name)
-	defer f.Close()
-	n, err := io.WriteString(f, body)
 
+	n, err := io.WriteString(f, body)
+	f.Close()
 	if err != nil {
 		fmt.Println(n, err)
+	}
+	//Now create indivitual pages for each year.
+	for k, v := range years {
+		var doc bytes.Buffer
+		ps := make([]ArchiveLink, 0)
+		posts := v
+		sort.Sort(ByDate(posts))
+		for i := range posts {
+			p := posts[i]
+			ps = append(ps, ArchiveLink{Time_str: p.Date.Format("[2006-01-02 15:04:05]"), Url: p.Url,
+				Text: p.Title})
+		}
+		ar := Archivelist{Year: k, ArLinks: ps, Logo: conf.Logo, Links: conf.Links}
+
+		tml2, err := template.ParseFiles("./templates/year.html", "./templates/base.html")
+		if err != nil {
+			fmt.Println(err)
+		}
+		err = tml2.ExecuteTemplate(&doc, "base", ar)
+		if err != nil {
+			fmt.Println(err)
+		}
+		body := doc.String()
+		name := fmt.Sprintf("./output/%s.html", k)
+		f, err := os.Create(name)
+		n, err := io.WriteString(f, body)
+		f.Close()
+		if err != nil {
+			fmt.Println(n, err)
+		}
+
 	}
 }
 
@@ -662,14 +709,14 @@ func site_rebuild(rebuild, rebuild_index bool) {
 	catslinks := make(map[string][]Post, 0)
 
 	catnames := make(map[string]string, 0)
-	pageyears := make(map[string]bool, 0)
+	pageyears := make(map[string][]Post, 0)
 	names := findfiles()
 	for i := range names {
 		hash := create_hash(names[i])
 		post := read_post(names[i], conf)
 		//Mark the date of the post.
 		postdate := strconv.Itoa(post.Date.Year())
-		pageyears[postdate] = true
+		pageyears[postdate] = append(pageyears[postdate], post)
 		for i := range post.Tags {
 			name := post.Tags[i]
 			catslug := get_slug(name)
