@@ -4,7 +4,7 @@ Installation
 Install golang
 ---------------
 
-Download golang from `here <http://go.googlecode.com/files/go1.1.2.linux-amd64.tar.gz>`_ , extract go directory
+Download golang from `here <https://go.googlecode.com/files/go1.2.1.linux-amd64.tar.gz>`_ , extract go directory
 under your home directory.
 
 ::
