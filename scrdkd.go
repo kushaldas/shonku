@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"encoding/xml"
 	"flag"
 	"fmt"
 	"github.com/gorilla/feeds"
@@ -97,8 +98,18 @@ type Indexposts struct {
 	Main      bool
 }
 
+type Sitemap struct {
+	Loc      string `xml:"loc"`
+	Lastmod  string `xml:"lastmod"`
+	Priority string `xml:"priority"`
+}
+
+type SiteDB map[string]Sitemap
+
 type FileDB map[string]string
 
+var current_time time.Time
+var SDB SiteDB
 var FDB FileDB
 var conf Configuration
 var POSTN int
@@ -427,6 +438,9 @@ func build_index(pss []Post, index, pre, next int, indexname string) {
 	if err != nil {
 		fmt.Println(n, err)
 	}
+	// For Sitemap
+	smap := Sitemap{Loc: conf.URL + name[9:], Lastmod: current_time.Format("2006-01-02"), Priority: "0.5"}
+	SDB[smap.Loc] = smap
 }
 
 /*
@@ -597,6 +611,9 @@ func build_categories(cat Catpage) {
 	if err != nil {
 		fmt.Println(n, err)
 	}
+	// For Sitemap
+	smap := Sitemap{Loc: conf.URL + "categories/index.html", Lastmod: current_time.Format("2006-01-02"), Priority: "0.5"}
+	SDB[smap.Loc] = smap
 }
 
 func create_archive(years map[string][]Post) {
@@ -627,6 +644,9 @@ func create_archive(years map[string][]Post) {
 	if err != nil {
 		fmt.Println(n, err)
 	}
+	// For Sitemap
+	smap := Sitemap{Loc: conf.URL + "archive.html", Lastmod: current_time.Format("2006-01-02"), Priority: "0.5"}
+	SDB[smap.Loc] = smap
 	//Now create indivitual pages for each year.
 	for k, v := range years {
 		var doc bytes.Buffer
@@ -654,6 +674,9 @@ func create_archive(years map[string][]Post) {
 		f, err := os.Create(name)
 		n, err := io.WriteString(f, body)
 		f.Close()
+		// For Sitemap
+		smap := Sitemap{Loc: conf.URL + k + ".html", Lastmod: current_time.Format("2006-01-02"), Priority: "0.5"}
+		SDB[smap.Loc] = smap
 		if err != nil {
 			fmt.Println(n, err)
 		}
@@ -707,6 +730,7 @@ This rebuilds the whole site.
 Any chnage to the configuration file will force this.
 */
 func site_rebuild(rebuild, rebuild_index bool) {
+
 	var indexlist []Post
 	ps := make([]Post, 0)
 
@@ -727,12 +751,16 @@ func site_rebuild(rebuild, rebuild_index bool) {
 			catslinks[k] = append(catslinks[k], post)
 		}
 
+		// For Sitemap
+		smap := Sitemap{Loc: post.Url, Lastmod: post.Date.Format("2006-01-02"), Priority: "0.5"}
+
 		if rebuild || changed_ornot(names[i], hash) {
 			fmt.Println(names[i])
 			build_post(post)
 			rebuild_index = true
 			// Also mark that this post was changed on disk
 			post.Changed = true
+			smap.Lastmod = current_time.Format("2006-01-02")
 
 			//Mark all categories need to be rebuild
 			for i := range post.Tags {
@@ -743,6 +771,7 @@ func site_rebuild(rebuild, rebuild_index bool) {
 
 		}
 		ps = append(ps, post)
+		SDB[post.Url] = smap
 	}
 
 	cat := Catpage{Cats: catnames, Links: conf.Links, Logo: conf.Logo}
@@ -819,12 +848,15 @@ func main() {
 		os.Exit(0)
 	}
 
+	current_time = time.Now().Local()
+	SDB = make(SiteDB, 0)
 	conf = get_conf()
 
 	// Get the build file database.
 	createdb()
 	FDB = get_fdb()
 	defer save_fdb()
+	defer create_sitemap()
 
 	if *newpost {
 		new_post()
@@ -838,6 +870,7 @@ func main() {
 
 	if *force {
 		site_rebuild(true, true)
+		create_sitemap()
 		os.Exit(0)
 	}
 
@@ -845,4 +878,35 @@ func main() {
 
 	rebuild_index := false
 	site_rebuild(false, rebuild_index)
+
+}
+
+/*
+To create the sitemap xml file
+*/
+func create_sitemap() {
+	type Urlset struct {
+		XMLName  xml.Name  `xml:"urlset"`
+		Xmlns    string    `xml:"xmlns,attr"`
+		Xmlnsxsi string    `xml:"xmlns:xsi,attr"`
+		Xsi      string    `xml:"xsi:schemaLocation,attr"`
+		Urls     []Sitemap `xml:"url"`
+	}
+	v := Urlset{Xmlns: "http://www.sitemaps.org/schemas/sitemap/0.9", Xmlnsxsi: "http://www.w3.org/2001/XMLSchema-instance",
+		Xsi: "http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd"}
+
+	urls := make([]Sitemap, 0)
+	for _, v := range SDB {
+		urls = append(urls, v)
+	}
+
+	v.Urls = urls
+	f, _ := os.Create("./output/sitemap.xml")
+	defer f.Close()
+	enc := xml.NewEncoder(f)
+	enc.Indent("  ", "    ")
+	if err := enc.Encode(v); err != nil {
+		fmt.Println("error: %	v\n", err)
+	}
+
 }
