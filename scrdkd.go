@@ -534,7 +534,10 @@ func create_theme_files() {
 		"assets/css/colorbox.css",
 		"templates/index.html",
 		"templates/category-index.html",
-		"templates/post.html"}
+		"templates/post.html",
+		"templates/base.html",
+		"templates/archive.html",
+		"templates/year.html"}
 	for i := range names {
 		name := names[i]
 		data, _ := Asset(name)
