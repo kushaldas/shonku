@@ -3,9 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"code.google.com/p/go-sqlite/go1/sqlite3"
 	"crypto/sha256"
-	"database/sql"
 	"encoding/base64"
 	"encoding/json"
 	"flag"
@@ -99,6 +97,9 @@ type Indexposts struct {
 	Main      bool
 }
 
+type FileDB map[string]string
+
+var FDB FileDB
 var conf Configuration
 var POSTN int
 
@@ -118,17 +119,34 @@ func (a ByODate) Less(i, j int) bool { return a[j].Date.After(a[i].Date) }
 Creates the empty build database.
 */
 func createdb() {
-	filename := ".scrdkd.db"
-	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		// Our db is missing, time to recreate it.
-		conn, err := sqlite3.Open(filename)
-		if err != nil {
-			fmt.Println("Unable to open the database: %s", err)
-			os.Exit(1)
-		}
-		defer conn.Close()
-		conn.Exec("CREATE TABLE builds(id INTEGER PRIMARY KEY AUTOINCREMENT, path TEXT, hash TEXT);")
+	filename := ".scrdkd.json"
+	m := make(map[string]string, 0)
+	m["file"] = "filehash"
+	if !exists(filename) {
+		f, _ := os.Create(filename)
+		enc := json.NewEncoder(f)
+		enc.Encode(m)
+		f.Close()
+
 	}
+}
+
+/*
+Reads the file database
+*/
+func get_fdb() FileDB {
+	file, err := os.Open(".scrdkd.json")
+	if err != nil {
+		panic(err)
+	}
+	decoder := json.NewDecoder(file)
+	//configuration := make(Configuration)
+	var fdb FileDB
+	err = decoder.Decode(&fdb)
+	if err != nil {
+		panic(err)
+	}
+	return fdb
 }
 
 /*
@@ -162,37 +180,12 @@ func create_hash(filename string) string {
 Finds out if the file content changed from the last build.
 */
 func changed_ornot(filename, hash string) bool {
-	db := ".scrdkd.db"
-	if _, err := os.Stat(db); err == nil {
-		// Our db is missing, time to recreate it.
-		conn, err := sql.Open("sqlite3", db)
-		if err != nil {
-			fmt.Println("Unable to open the database: %s", err)
-			os.Exit(1)
+	if val, ok := FDB[filename]; ok {
+		if val == hash {
+			return false
 		}
-		defer conn.Close()
-		stmt := fmt.Sprintf("SELECT id, path, hash FROM builds where path='%s';", filename)
-		rows, err := conn.Query(stmt)
-		defer rows.Close()
-		if rows.Next() {
-			var article Article
-			err = rows.Scan(&article.Id, &article.Path, &article.Hash)
-			if article.Hash == hash {
-				return false
-			} else { // File hash has changed, we need to update the db
-				stmt = fmt.Sprintf("UPDATE builds SET hash='%s' where id=%d;", hash, article.Id)
-				rows.Close()
-				_, err = conn.Exec(stmt)
-				if err != nil {
-					fmt.Println(err)
-				}
-				return true
-			}
-		} else { // Should be insert into DB
-			conn.Exec("INSERT INTO builds(path, hash) VALUES (?, ?)", filename, hash)
-			return true
-		}
-
+	} else {
+		FDB[filename] = hash
 	}
 	return true
 }
@@ -545,9 +538,11 @@ func create_theme_files() {
 	for i := range names {
 		name := names[i]
 		data, _ := Asset(name)
-		f, _ := os.Create(name)
-		defer f.Close()
-		io.WriteString(f, string(data))
+		if !exists(name) {
+			f, _ := os.Create(name)
+			defer f.Close()
+			io.WriteString(f, string(data))
+		}
 	}
 
 }
@@ -796,6 +791,16 @@ func site_rebuild(rebuild, rebuild_index bool) {
 	}
 }
 
+/*
+Saves the file build database
+*/
+func save_fdb() {
+	f, _ := os.Create(".scrdkd.json")
+	enc := json.NewEncoder(f)
+	enc.Encode(FDB)
+	f.Close()
+}
+
 func main() {
 
 	POSTN = 10 // Magic number of posts in every index.
@@ -812,6 +817,11 @@ func main() {
 	}
 
 	conf = get_conf()
+
+	// Get the build file database.
+	createdb()
+	FDB = get_fdb()
+	defer save_fdb()
 
 	if *newpost {
 		new_post()
@@ -830,7 +840,6 @@ func main() {
 
 	fmt.Println(conf)
 
-	createdb()
 	rebuild_index := false
 	site_rebuild(false, rebuild_index)
 }
