@@ -353,16 +353,25 @@ func build_feeds(ps []Post, conf Configuration, name string) {
 /*
 Builds a post based on the template
 */
-func build_post(ps Post) string {
+func build_post(ps Post, ptype string) string {
 	var doc bytes.Buffer
-	var body string
-	tml, _ := template.ParseFiles("./templates/post.html", "./templates/base.html")
-	err := tml.ExecuteTemplate(&doc, "base", ps)
+	var body, name string
+	var err error
+	var tml *template.Template
+	if ptype == "post" {
+		tml, err = template.ParseFiles("./templates/post.html", "./templates/base.html")
+		name = "./output/posts/" + ps.Slug + ".html"
+	} else {
+		// This should read the pages template
+		tml, err = template.ParseFiles("./templates/post.html", "./templates/base.html")
+		name = "./output/pages/" + ps.Slug + ".html"
+	}
+	err = tml.ExecuteTemplate(&doc, "base", ps)
 	if err != nil {
 		fmt.Println(err)
 	}
 	body = doc.String()
-	name := "./output/posts/" + ps.Slug + ".html"
+
 	f, err := os.Create(name)
 	defer f.Close()
 	n, err := io.WriteString(f, body)
@@ -756,7 +765,7 @@ func site_rebuild(rebuild, rebuild_index bool) {
 
 		if rebuild || changed_ornot(names[i], hash) {
 			fmt.Println(names[i])
-			build_post(post)
+			build_post(post, "post")
 			rebuild_index = true
 			// Also mark that this post was changed on disk
 			post.Changed = true
@@ -771,6 +780,22 @@ func site_rebuild(rebuild, rebuild_index bool) {
 
 		}
 		ps = append(ps, post)
+		SDB[post.Url] = smap
+	}
+
+	// Now let us build the static pages.
+	names = findfiles("./pages/")
+	for i := range names {
+		hash := create_hash(names[i])
+		post := read_post(names[i], conf)
+		// For Sitemap
+		smap := Sitemap{Loc: post.Url, Lastmod: post.Date.Format("2006-01-02"), Priority: "0.5"}
+
+		if rebuild || changed_ornot(names[i], hash) {
+			fmt.Println(names[i])
+			build_post(post, "page")
+			smap.Lastmod = current_time.Format("2006-01-02")
+		}
 		SDB[post.Url] = smap
 	}
 
