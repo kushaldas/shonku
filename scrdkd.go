@@ -70,15 +70,17 @@ type Post struct {
 }
 
 type Catpage struct {
-	Cats  map[string]string
-	Logo  string
-	Links []PageLink
+	Cats   map[string]string
+	Logo   string
+	Links  []PageLink
+	Disqus bool
 }
 
 type Archivepage struct {
-	Years []string
-	Logo  string
-	Links []PageLink
+	Years  []string
+	Logo   string
+	Links  []PageLink
+	Disqus bool
 }
 
 type Archivelist struct {
@@ -86,6 +88,7 @@ type Archivelist struct {
 	ArLinks []ArchiveLink
 	Logo    string
 	Links   []PageLink
+	Disqus  bool
 }
 
 type Indexposts struct {
@@ -98,6 +101,7 @@ type Indexposts struct {
 	Logo      string
 	Links     []PageLink
 	Main      bool
+	Disqus    bool
 }
 
 type Sitemap struct {
@@ -422,6 +426,7 @@ func build_index(pss []Post, index, pre, next int, indexname string) {
 	} else {
 		ips.Main = false
 	}
+	ips.Disqus = false
 	tml, err := template.ParseFiles("./templates/index.html", "./templates/base.html")
 	if err != nil {
 		fmt.Println(err)
@@ -611,6 +616,7 @@ func build_categories(cat Catpage) {
 	if err != nil {
 		fmt.Println(err)
 	}
+	cat.Disqus = false
 	err = tml.ExecuteTemplate(&doc, "base", cat)
 	if err != nil {
 		fmt.Println(err)
@@ -644,6 +650,7 @@ func create_archive(years map[string][]Post) {
 	if err != nil {
 		fmt.Println(err)
 	}
+	archive.Disqus = false
 	err = tml.ExecuteTemplate(&doc, "base", archive)
 	if err != nil {
 		fmt.Println(err)
@@ -673,7 +680,7 @@ func create_archive(years map[string][]Post) {
 				Text: p.Title})
 		}
 		ar := Archivelist{Year: k, ArLinks: ps, Logo: conf.Logo, Links: conf.Links}
-
+		ar.Disqus = false
 		tml2, err := template.ParseFiles("./templates/year.html", "./templates/base.html")
 		if err != nil {
 			fmt.Println(err)
