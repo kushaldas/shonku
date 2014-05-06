@@ -163,11 +163,11 @@ func get_fdb() FileDB {
 /*
 Finds all the files from our posts directory.
 */
-func findfiles() []string {
-	files, _ := ioutil.ReadDir("./posts/")
+func findfiles(dir string) []string {
+	files, _ := ioutil.ReadDir(dir)
 	names := make([]string, 0)
 	for _, f := range files {
-		names = append(names, "./posts/"+f.Name())
+		names = append(names, dir+f.Name())
 	}
 	return names
 }
@@ -739,7 +739,7 @@ func site_rebuild(rebuild, rebuild_index bool) {
 
 	catnames := make(map[string]string, 0)
 	pageyears := make(map[string][]Post, 0)
-	names := findfiles()
+	names := findfiles("./posts/")
 	for i := range names {
 		hash := create_hash(names[i])
 		post := read_post(names[i], conf)
