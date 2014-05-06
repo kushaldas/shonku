@@ -41,6 +41,14 @@
     
 {{template "body" .}}
 	</div>
+	{{.Url}}
+	{{if .Disqus}}
+	<div id="disqus_thread"></div>
+        <script type="text/javascript">var disqus_shortname="{{.Disqus}}";var disqus_url="{{.Durl}}";(function(){var a=document.createElement("script");a.type="text/javascript";a.async=true;a.src="http://"+disqus_shortname+".disqus.com/embed.js";(document.getElementsByTagName("head")[0]||document.getElementsByTagName("body")[0]).appendChild(a)})();        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </div>
+	{{end}}
     </div>
 	</div>
 	</div>

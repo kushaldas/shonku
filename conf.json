@@ -7,7 +7,7 @@
 	"Logo" : "URL for logo",
 	"Content_footer": "Copyright 2014",
 	"Email": "author@email",
-	"Disqus": "",
+	"Disqus": "yourdisqus",
 	"Links": [{"Link":"/pages/aboutme.html", "Text": "About"},
 			{"Link":"/categories/", "Text":"Categories"},
 			{"Link":"/archive.html", "Text":"Archive"}]

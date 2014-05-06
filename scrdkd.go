@@ -63,8 +63,10 @@ type Post struct {
 	Tags    map[string]string
 	Changed bool
 	Url     string
+	Durl    template.JSStr
 	Logo    string
 	Links   []PageLink
+	Disqus  string
 }
 
 type Catpage struct {
@@ -269,8 +271,10 @@ func read_post(filename string, conf Configuration) Post {
 		p.Tags = tags
 		p.Changed = false
 		p.Url = fmt.Sprintf("%sposts/%s.html", conf.URL, p.Slug)
+		p.Durl = template.JSStr(p.Url)
 		p.Logo = conf.Logo
 		p.Links = conf.Links
+		p.Disqus = conf.Disqus
 
 	}
 	return p
