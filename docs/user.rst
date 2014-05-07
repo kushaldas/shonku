@@ -38,3 +38,14 @@ Just run the following command.
     Building post: ./posts/hello-world.md
 	
 You can check the output directory for the finished blog post.
+
+Force rebuild of the whole site
+--------------------------------
+
+::
+
+    $ ./shonku.bin -force
+	
+The above command will rebuild the whole site. You may want to use this command when
+you make any change to your theme or configuration file.
+
