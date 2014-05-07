@@ -385,7 +385,7 @@ func build_post(ps Post, ptype string) string {
 	n, err := io.WriteString(f, body)
 
 	if err != nil {
-		fmt.Println(n, err)
+		fmt.Println("Error while writing output: ", n, err)
 	}
 
 	return body
@@ -395,7 +395,7 @@ func build_post(ps Post, ptype string) string {
 Creates index pages.
 */
 func build_index(pss []Post, index, pre, next int, indexname string) {
-	fmt.Println(index, pre, next)
+
 	var doc bytes.Buffer
 	var body, name string
 	var ips Indexposts
