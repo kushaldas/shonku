@@ -14,10 +14,10 @@ import (
 	"html/template"
 	"io"
 	"io/ioutil"
-	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -214,12 +214,16 @@ http://code.activestate.com/recipes/577257-slugify-make-a-string-usable-in-a-url
 We need to improve this function much more.
 */
 func get_slug(s string) string {
-	s = strings.Replace(s, "(", "-", -1)
-	s = strings.Replace(s, ")", "-", -1)
-	s = strings.Replace(s, " ", "-", -1)
-	s = strings.Replace(s, "(", "-", -1)
-	s = url.QueryEscape(s)
-	return strings.ToLower(s)
+	// removing unwanted characters
+	slug := regexp.MustCompile("[^a-zA-Z0-9-]").ReplaceAllString(s, "-")
+
+	// collapsing dashes
+	slug = regexp.MustCompile("-+").ReplaceAllString(slug, "-")
+
+	// removing beginning and ending dashes
+	slug = strings.Trim(slug, "-")
+
+	return strings.ToLower(slug)
 }
 
 /*
@@ -942,7 +946,7 @@ func create_sitemap() {
 	enc := xml.NewEncoder(f)
 	enc.Indent("  ", "    ")
 	if err := enc.Encode(v); err != nil {
-		fmt.Println("error: %	v\n", err)
+		fmt.Println("error: %   v\n", err)
 	}
 
 }
