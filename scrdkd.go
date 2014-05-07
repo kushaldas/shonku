@@ -863,7 +863,7 @@ func site_rebuild(rebuild, rebuild_index bool) {
 		cmd.Stdout = &out
 		err := cmd.Run()
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("Error in rsync:", err)
 		}
 	}
 }
