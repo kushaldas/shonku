@@ -858,13 +858,27 @@ func site_rebuild(rebuild, rebuild_index bool) {
 		curpath, _ := filepath.Abs(".")
 		frompath := curpath + "/assets/"
 		topath := curpath + "/output/assets/"
-		cmd := exec.Command("rsync", "-avz", frompath, topath)
-		var out bytes.Buffer
-		cmd.Stdout = &out
-		err := cmd.Run()
-		if err != nil {
-			fmt.Println("Error in rsync:", err)
-		}
+		rsync(frompath, topath)
+		frompath = curpath + "/posts/"
+		topath = curpath + "/output/posts/"
+		rsync(frompath, topath)
+		frompath = curpath + "/pages/"
+		topath = curpath + "/output/pages/"
+		rsync(frompath, topath)
+
+	}
+}
+
+/*
+Runs the rsync command with the given paths.
+*/
+func rsync(frompath, topath string) {
+	cmd := exec.Command("rsync", "-avz", frompath, topath)
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println("Error in rsync:", err)
 	}
 }
 
