@@ -784,7 +784,7 @@ func site_rebuild(rebuild, rebuild_index bool) {
 		smap := Sitemap{Loc: post.Url, Lastmod: post.Date.Format("2006-01-02"), Priority: "0.5"}
 
 		if rebuild || changed_ornot(names[i], hash) {
-			fmt.Println(names[i])
+			fmt.Println("Building post:", names[i])
 			build_post(post, "post")
 			rebuild_index = true
 			// Also mark that this post was changed on disk
@@ -812,7 +812,7 @@ func site_rebuild(rebuild, rebuild_index bool) {
 		smap := Sitemap{Loc: post.Url, Lastmod: post.Date.Format("2006-01-02"), Priority: "0.5"}
 
 		if rebuild || changed_ornot(names[i], hash) {
-			fmt.Println(names[i])
+			fmt.Println("Building page:", names[i])
 			build_post(post, "page")
 			smap.Lastmod = current_time.Format("2006-01-02")
 		}
