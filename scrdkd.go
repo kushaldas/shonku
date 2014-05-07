@@ -200,9 +200,9 @@ func changed_ornot(filename, hash string) bool {
 	if val, ok := FDB[filename]; ok {
 		if val == hash {
 			return false
+		} else {
+			FDB[filename] = hash
 		}
-	} else {
-		FDB[filename] = hash
 	}
 	return true
 }
@@ -900,8 +900,6 @@ func main() {
 	// Get the build file database.
 	createdb()
 	FDB = get_fdb()
-	defer save_fdb()
-	defer create_sitemap()
 
 	if *newpost {
 		new_post()
@@ -915,6 +913,7 @@ func main() {
 
 	if *force {
 		site_rebuild(true, true)
+		save_fdb()
 		create_sitemap()
 		os.Exit(0)
 	}
@@ -923,6 +922,8 @@ func main() {
 
 	rebuild_index := false
 	site_rebuild(false, rebuild_index)
+	save_fdb()
+	create_sitemap()
 
 }
 
