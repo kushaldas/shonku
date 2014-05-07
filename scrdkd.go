@@ -371,7 +371,7 @@ func build_post(ps Post, ptype string) string {
 		name = "./output/posts/" + ps.Slug + ".html"
 	} else {
 		// This should read the pages template
-		tml, err = template.ParseFiles("./templates/post.html", "./templates/base.html")
+		tml, err = template.ParseFiles("./templates/page.html", "./templates/base.html")
 		name = "./output/pages/" + ps.Slug + ".html"
 	}
 	err = tml.ExecuteTemplate(&doc, "base", ps)
@@ -569,6 +569,7 @@ func create_theme_files() {
 		"templates/post.html",
 		"templates/base.html",
 		"templates/archive.html",
+		"templates/page.html",
 		"templates/year.html"}
 	for i := range names {
 		name := names[i]
@@ -578,6 +579,14 @@ func create_theme_files() {
 			defer f.Close()
 			io.WriteString(f, string(data))
 		}
+	}
+
+	// Do the conf.json as a special case.
+	data, _ := Asset("templates/conf.json")
+	if !exists("conf.json") {
+		f, _ := os.Create("conf.json")
+		defer f.Close()
+		io.WriteString(f, string(data))
 	}
 
 }
