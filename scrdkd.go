@@ -203,6 +203,8 @@ func changed_ornot(filename, hash string) bool {
 		} else {
 			FDB[filename] = hash
 		}
+	} else {
+		FDB[filename] = hash
 	}
 	return true
 }
