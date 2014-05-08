@@ -12,7 +12,7 @@ import (
 )
 
 func new_post() {
-	const longform = "2006-01-02 15:04:05.999999999 -0700 MST"
+	const longform = "2006/01/02 15:04:05"
 	var title string
 	fmt.Print("Enter the title of the post: ")
 	in := bufio.NewReader(os.Stdin)
@@ -34,7 +34,7 @@ func new_post() {
 }
 
 func new_page() {
-	const longform = "2006-01-02 15:04:05.999999999 -0700 MST"
+	const longform = "2006/01/02 15:04:05"
 	var title string
 	fmt.Print("Enter the title of the page: ")
 	in := bufio.NewReader(os.Stdin)

@@ -289,7 +289,7 @@ func read_post(filename string, conf Configuration) Post {
 }
 
 func get_time(text string) time.Time {
-	const longform = "2006-01-02 15:04:05.999999999 -0700 MST"
+	const longform = "2006/01/02 15:04:05"
 	//now := time.Now()
 	//x := now.String()
 	//fmt.Println(x)
@@ -858,19 +858,18 @@ func site_rebuild(rebuild, rebuild_index bool) {
 		}
 		build_feeds(indexlist, conf, "cmain")
 
-		// We are using system installed rsync for this.
-		curpath, _ := filepath.Abs(".")
-		frompath := curpath + "/assets/"
-		topath := curpath + "/output/assets/"
-		rsync(frompath, topath)
-		frompath = curpath + "/posts/"
-		topath = curpath + "/output/posts/"
-		rsync(frompath, topath)
-		frompath = curpath + "/pages/"
-		topath = curpath + "/output/pages/"
-		rsync(frompath, topath)
-
 	}
+	// We are using system installed rsync for this.
+	curpath, _ := filepath.Abs(".")
+	frompath := curpath + "/assets/"
+	topath := curpath + "/output/assets/"
+	rsync(frompath, topath)
+	frompath = curpath + "/posts/"
+	topath = curpath + "/output/posts/"
+	rsync(frompath, topath)
+	frompath = curpath + "/pages/"
+	topath = curpath + "/output/pages/"
+	rsync(frompath, topath)
 }
 
 /*
