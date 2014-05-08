@@ -893,7 +893,7 @@ func save_fdb() {
 }
 
 func main() {
-
+	check_dir()
 	POSTN = 10 // Magic number of posts in every index.
 
 	new_site := flag.Bool("new_site", false, "Creates a new site in the current directory.")
@@ -938,6 +938,29 @@ func main() {
 	site_rebuild(false, rebuild_index)
 	save_fdb()
 	create_sitemap()
+
+}
+
+/*
+Checks if the current directory is a correct directory to work on.ArchiveLink
+Issue #3
+*/
+func check_dir() {
+	names := []string{
+		"conf.json",
+		"templates/index.html",
+		"templates/category-index.html",
+		"templates/post.html",
+		"templates/base.html",
+		"templates/archive.html",
+		"templates/page.html",
+		"templates/year.html"}
+	for i := range names {
+		if !exists(names[i]) {
+			fmt.Println(names[i], "is missing from current directory.")
+			os.Exit(-10)
+		}
+	}
 
 }
 
