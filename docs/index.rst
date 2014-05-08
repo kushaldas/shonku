@@ -14,6 +14,7 @@ Contents:
    install
    user
    configuration
+   contrib
 
 
 
