@@ -575,6 +575,7 @@ func create_theme_files() {
 		"assets/css/style.css",
 		"assets/css/colorbox.css",
 		"templates/index.html",
+		"templates/cat-index.html",
 		"templates/category-index.html",
 		"templates/post.html",
 		"templates/base.html",
@@ -958,6 +959,7 @@ func check_dir() {
 	names := []string{
 		"conf.json",
 		"templates/index.html",
+		"templates/cat-index.html",
 		"templates/category-index.html",
 		"templates/post.html",
 		"templates/base.html",
