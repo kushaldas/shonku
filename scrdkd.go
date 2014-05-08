@@ -403,6 +403,8 @@ func build_index(pss []Post, index, pre, next int, indexname string) {
 	var doc bytes.Buffer
 	var body, name string
 	var ips Indexposts
+	var tml *template.Template
+	var err error
 	ips.Posts = pss
 	if pre != 0 {
 		ips.PreviousF = true
@@ -431,7 +433,11 @@ func build_index(pss []Post, index, pre, next int, indexname string) {
 		ips.Main = false
 	}
 	ips.Disqus = false
-	tml, err := template.ParseFiles("./templates/index.html", "./templates/base.html")
+	if indexname == "index" {
+		tml, err = template.ParseFiles("./templates/index.html", "./templates/base.html")
+	} else {
+		tml, err = template.ParseFiles("./templates/cat-index.html", "./templates/base.html")
+	}
 	if err != nil {
 		fmt.Println(err)
 	}
