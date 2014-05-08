@@ -696,7 +696,7 @@ func create_archive(years map[string][]Post) {
 		for i := range posts {
 			p := posts[i]
 			ps = append(ps, ArchiveLink{Time_str: p.Date.Format("[2006-01-02 15:04:05]"),
-				Url:  fmt.Sprintf("/posts/%s.html", p.Slug),
+				Url:  fmt.Sprintf("posts/%s.html", p.Slug),
 				Text: p.Title})
 		}
 		ar := Archivelist{Year: k, ArLinks: ps, Logo: conf.Logo, Links: conf.Links}
