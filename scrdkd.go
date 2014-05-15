@@ -907,7 +907,7 @@ func save_fdb() {
 }
 
 func main() {
-	check_dir()
+
 	POSTN = 10 // Magic number of posts in every index.
 
 	new_site := flag.Bool("new_site", false, "Creates a new site in the current directory.")
@@ -920,7 +920,7 @@ func main() {
 		create_site()
 		os.Exit(0)
 	}
-
+	check_dir()
 	current_time = time.Now().Local()
 	SDB = make(SiteDB, 0)
 	conf = get_conf()
