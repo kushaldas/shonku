@@ -60,6 +60,7 @@ type Post struct {
 	Slug    string
 	Body    template.HTML
 	Date    time.Time
+	S_Date  string
 	Tags    map[string]string
 	Changed bool
 	Url     string
@@ -278,6 +279,7 @@ func read_post(filename string, conf Configuration) Post {
 		body := blackfriday.MarkdownCommon(buffer.Bytes())
 		p.Body = template.HTML(string(body))
 		p.Date = get_time(date)
+		p.S_Date = date
 		p.Tags = tags
 		p.Changed = false
 		p.Url = fmt.Sprintf("%sposts/%s.html", conf.URL, p.Slug)
