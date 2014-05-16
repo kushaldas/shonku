@@ -30,6 +30,7 @@ After golang installation, get the dependent libraries.
 
     $ go get github.com/russross/blackfriday
     $ go get github.com/gorilla/feeds
+	$ go get code.google.com/p/go.net/html
 
 Building the source
 ===================
