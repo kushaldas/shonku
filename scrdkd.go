@@ -496,6 +496,9 @@ func create_dirs() {
 	if !exists("./templates/") {
 		os.Mkdir("./templates/", 0777)
 	}
+	if !exists("./files/") {
+		os.Mkdir("./files/", 0777)
+	}
 	if !exists("./output/") {
 		os.Mkdir("./output/", 0777)
 	}
@@ -881,6 +884,10 @@ func site_rebuild(rebuild, rebuild_index bool) {
 	frompath = curpath + "/pages/"
 	topath = curpath + "/output/pages/"
 	rsync(frompath, topath)
+	frompath = curpath + "/files/"
+	topath = curpath + "/output/"
+	rsync(frompath, topath)
+
 }
 
 /*
