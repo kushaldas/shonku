@@ -26,6 +26,10 @@ import (
 
 // All structures below are required for rendering different webpages.
 
+/*
+Configuration holds the configuration details from conf.json.
+Names should match with that configuration file.
+*/
 type Configuration struct {
 	Author         string
 	Title          string
@@ -38,23 +42,27 @@ type Configuration struct {
 	Links          []PageLink
 }
 
+/*
+PageLink holds the top menu links for each rendered html files.
+*/
 type PageLink struct {
 	Link string
 	Text string
 }
 
+/*
+ArchiveLink holds the deatails for creating each year's archive page.
+*/
 type ArchiveLink struct {
 	Time_str string
 	Url      string
 	Text     string
 }
 
-type Article struct {
-	Id   int
-	Path string
-	Hash string
-}
-
+/*
+Post contails every detail required for a post. This is being used in both
+post and page types.
+*/
 type Post struct {
 	Title   string
 	Slug    string
@@ -70,6 +78,9 @@ type Post struct {
 	Disqus  string
 }
 
+/*
+Catpage is to create category pages.
+*/
 type Catpage struct {
 	Cats   map[string]string
 	Logo   string
@@ -77,6 +88,9 @@ type Catpage struct {
 	Disqus bool
 }
 
+/*
+Archivepage is for the primary archive index page.
+*/
 type Archivepage struct {
 	Years  []string
 	Logo   string
@@ -84,6 +98,9 @@ type Archivepage struct {
 	Disqus bool
 }
 
+/*
+Archivelist is passed to the templates.
+*/
 type Archivelist struct {
 	Year    string
 	ArLinks []ArchiveLink
@@ -292,6 +309,9 @@ func read_post(filename string, conf Configuration) Post {
 	return p
 }
 
+/*
+Converts string to time.
+*/
 func get_time(text string) time.Time {
 	const longform = "2006/01/02 15:04:05"
 	//now := time.Now()
@@ -1014,7 +1034,7 @@ func create_sitemap() {
 	enc := xml.NewEncoder(f)
 	enc.Indent("  ", "    ")
 	if err := enc.Encode(v); err != nil {
-		fmt.Println("error: %   v\n", err)
+		fmt.Println("error: %v\n", err)
 	}
 
 }
