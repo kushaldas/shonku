@@ -329,7 +329,7 @@ func read_post(filename string, conf Configuration) Post {
 Converts string to time.
 */
 func get_time(text string) time.Time {
-	const longform = "2006/01/02 15:04:05"
+	const longform = "2006/01/02 15:04:05 MST"
 	//now := time.Now()
 	//x := now.String()
 	//fmt.Println(x)
