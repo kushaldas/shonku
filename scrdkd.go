@@ -906,6 +906,9 @@ func save_fdb() {
 	f.Close()
 }
 
+/*
+Entry point for the application.
+*/
 func main() {
 
 	POSTN = 10 // Magic number of posts in every index.

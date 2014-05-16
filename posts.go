@@ -8,6 +8,9 @@ import (
 	"time"
 )
 
+/*
+Creates a new post file.
+*/
 func new_post() {
 	const longform = "2006/01/02 15:04:05"
 	var title string
@@ -30,6 +33,9 @@ func new_post() {
 
 }
 
+/*
+TODO: Creating new page should be updated in future.
+*/
 func new_page() {
 	const longform = "2006/01/02 15:04:05"
 	var title string
