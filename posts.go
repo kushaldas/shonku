@@ -10,6 +10,18 @@ import (
 )
 
 var input io.Reader = os.Stdin
+var pretext string = `<!--
+.. title: %s
+.. slug: %s
+.. date: %s
+.. tags: Blog
+.. link:
+.. description:
+.. type: text
+-->
+
+Write your post here.
+`
 
 /*
 Creates a new post file.
@@ -26,12 +38,10 @@ func new_post() {
 	f, err := os.Create(name)
 	defer f.Close()
 	if err == nil {
-		f.WriteString("title: " + title + "\n")
 		t := time.Now()
-		f.WriteString("date: " + t.Format(longform) + "\n")
-		f.WriteString("tags: Blog\n====\n\n")
+		text := fmt.Sprintf(pretext, title, slug, t.Format(longform))
+		f.WriteString(text)
 		fmt.Println("Your new post is ready at " + name)
-
 	}
 
 }
@@ -51,10 +61,9 @@ func new_page() {
 	f, err := os.Create(name)
 	defer f.Close()
 	if err == nil {
-		f.WriteString("title: " + title + "\n")
 		t := time.Now()
-		f.WriteString("date: " + t.Format(longform) + "\n")
-		f.WriteString("tags: Blog\n====\n\n")
+		text := fmt.Sprintf(pretext, title, slug, t.Format(longform))
+		f.WriteString(text)
 		fmt.Println("Your new page is ready at " + name)
 
 	}

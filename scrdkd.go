@@ -252,6 +252,9 @@ Reads a post and gets all details from it.
 func read_post(filename string, conf Configuration) Post {
 	var buffer bytes.Buffer
 	var p Post
+	var err error = nil
+	var onlyonce bool = true
+	var titleline, dateline, tagline, line string
 	flag := false
 	f, err := os.Open(filename)
 	if err != nil {
@@ -260,29 +263,42 @@ func read_post(filename string, conf Configuration) Post {
 	}
 	defer f.Close()
 	r := bufio.NewReader(f)
-	titleline, err := r.ReadString('\n')
-	dateline, err := r.ReadString('\n')
-	line, err := r.ReadString('\n')
-	tagline := line
-
 	for err == nil {
-		if line == "====\n" {
+		line, err = r.ReadString('\n')
+		buffer.WriteString(line)
+		if onlyonce && strings.HasPrefix(line, "<!--") {
+			onlyonce = false
 			flag = true
-			line, err = r.ReadString('\n')
+			continue
+		}
+		if !onlyonce && strings.HasPrefix(line, "-->") {
+			flag = false
 			continue
 		}
 		if flag {
-			buffer.WriteString(line)
+			i := strings.Index(line, ".. title:")
+			if i != -1 {
+				titleline = line[i+9:]
+				continue
+			}
+			i = strings.Index(line, ".. date:")
+			if i != -1 {
+				dateline = line[i+8:]
+				continue
+			}
+			i = strings.Index(line, ".. tags:")
+			if i != -1 {
+				tagline = line[i+8:]
+				continue
+			}
+
 		}
-		line, err = r.ReadString('\n')
 	}
 
 	if err == io.EOF {
-		title := titleline[6:]
-		title = strings.TrimSpace(title)
-		date := dateline[5:]
-		date = strings.TrimSpace(date)
-		tagsnonstripped := strings.Split(tagline[5:], ",")
+		title := strings.TrimSpace(titleline)
+		date := strings.TrimSpace(dateline)
+		tagsnonstripped := strings.Split(tagline, ",")
 		tags := make(map[string]string, 0)
 		for i := range tagsnonstripped {
 			word := strings.TrimSpace(tagsnonstripped[i])
