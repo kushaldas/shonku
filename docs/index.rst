@@ -16,6 +16,7 @@ Contents:
    user
    configuration
    contrib
+   themes
 
 
 
