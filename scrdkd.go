@@ -76,6 +76,15 @@ type Post struct {
 	Logo    string
 	Links   []PageLink
 	Disqus  string
+	EData   ExtraData
+}
+
+/*
+ExtraData contains any extra metadata related on posts for different themes.
+*/
+type ExtraData struct {
+	BrokenDate string
+	BrokenTime string
 }
 
 /*
@@ -320,6 +329,12 @@ func read_post(filename string, conf Configuration) Post {
 		p.Logo = conf.Logo
 		p.Links = conf.Links
 		p.Disqus = conf.Disqus
+
+		// Let us add any extra data for the themes.
+		var edata ExtraData
+		edata.BrokenDate = p.Date.Format("Jan 02, 2006")
+		edata.BrokenTime = p.Date.Format("15:04")
+		p.EData = edata
 
 	}
 	return p
