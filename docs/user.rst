@@ -1,6 +1,13 @@
 Usage
 ======
 
+Markdown only
+--------------
+
+We support only `Markdown <http://daringfireball.net/projects/markdown/>`_ format.
+You can learn it very fast and use any text editor to edit.
+
+
 Creating new site
 -------------------
 
