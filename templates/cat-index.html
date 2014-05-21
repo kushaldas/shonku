@@ -23,7 +23,7 @@
 			{{else }}
 	        <h1><a href="../posts/{{ .Slug }}.html">{{ .Title }}</a></h1>
 			{{end}}
-	        <small>  
+	        <small>
 	             Posted: {{ .S_Date }}
 	        </small>
 	        <hr>
@@ -37,17 +37,17 @@
 	{{if .NextF }}
     {{if .NextLast }}
 	<li class="previous">
-        <a href="index.html">Newer posts</a>
+        <a href="{{.Slug}}.html">Newer posts</a>
     </li>
     {{else}}
     <li class="previous">
-        <a href="index-{{ .Next }}.html">Newer posts</a>
+        <a href="{{.Slug}}-{{ .Next }}.html">Newer posts</a>
     </li>
     {{end}}
     {{end}}
 	{{if .PreviousF }}
     <li class="next">
-        <a href="index-{{ .Previous }}.html">Older posts</a>
+        <a href="{{.Slug}}-{{ .Previous }}.html">Older posts</a>
     </li>
     {{end}}
 </ul>

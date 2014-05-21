@@ -901,6 +901,7 @@ func site_rebuild(rebuild, rebuild_index bool) {
 		sort.Sort(ByDate(localps))
 		create_index_files(localps, k)
 		//Now build the feeds as required.
+		sort.Sort(ByDate(localps))
 
 		if len(localps) >= 10 {
 			indexlist = localps[:10]
