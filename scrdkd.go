@@ -119,6 +119,8 @@ type Archivelist struct {
 }
 
 type Indexposts struct {
+	Slug      string
+	Title     string
 	Posts     []Post
 	NextF     bool
 	PreviousF bool
@@ -366,7 +368,7 @@ func build_feeds(ps []Post, conf Configuration, name string) {
 		Link:        &feeds.Link{Href: conf.URL},
 		Description: conf.Description,
 		Author:      &feeds.Author{conf.Author, conf.Email},
-		Created:     now,
+		Created:     now.UTC(),
 	}
 	items := make([]*feeds.Item, 0)
 	var item *feeds.Item
@@ -376,8 +378,8 @@ func build_feeds(ps []Post, conf Configuration, name string) {
 			item = &feeds.Item{
 				Title:       post.Title,
 				Description: string(post.Body),
-				Created:     post.Date,
-				Updated:     now,
+				Created:     post.Date.UTC(),
+				Updated:     now.UTC(),
 				Author:      &feeds.Author{conf.Author, conf.Email},
 				Link:        &feeds.Link{Href: post.Url},
 			}
@@ -386,8 +388,8 @@ func build_feeds(ps []Post, conf Configuration, name string) {
 			item = &feeds.Item{
 				Title:       post.Title,
 				Description: string(post.Body),
-				Created:     post.Date,
-				Updated:     post.Date,
+				Created:     post.Date.UTC(),
+				Updated:     post.Date.UTC(),
 				Author:      &feeds.Author{conf.Author, conf.Email},
 				Link:        &feeds.Link{Href: post.Url},
 			}
@@ -461,6 +463,7 @@ func build_index(pss []Post, index, pre, next int, indexname string) {
 	var tml *template.Template
 	var err error
 	ips.Posts = pss
+	ips.Slug = indexname
 	if pre != 0 {
 		ips.PreviousF = true
 		ips.Previous = pre
@@ -790,6 +793,7 @@ func create_index_files(ps []Post, indexname string) {
 	index := 1
 	num := 0
 	length := len(ps)
+	sort.Sort(ByODate(ps))
 	sort_index := make([]Post, 0)
 	for i := range ps {
 		sort_index = append(sort_index, ps[i])
@@ -894,9 +898,10 @@ func site_rebuild(rebuild, rebuild_index bool) {
 	//Now create index(s) for categories.
 	for k, _ := range cat_needs_build {
 		localps := catslinks[k]
+		sort.Sort(ByDate(localps))
 		create_index_files(localps, k)
 		//Now build the feeds as required.
-		sort.Sort(ByDate(localps))
+
 		if len(localps) >= 10 {
 			indexlist = localps[:10]
 		} else {
