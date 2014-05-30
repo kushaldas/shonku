@@ -131,6 +131,7 @@ type Indexposts struct {
 	Links     []PageLink
 	Main      bool
 	Disqus    bool
+	Conf      Configuration
 }
 
 type Sitemap struct {
@@ -346,14 +347,14 @@ func read_post(filename string, conf Configuration) Post {
 MD renders Markdown without escaping HTML.
 */
 func MD(input []byte) []byte {
-		// set up the HTML renderer
+	// set up the HTML renderer
 	htmlFlags := 0
 	htmlFlags |= blackfriday.HTML_USE_XHTML
 	htmlFlags |= blackfriday.HTML_USE_SMARTYPANTS
 	htmlFlags |= blackfriday.HTML_SMARTYPANTS_FRACTIONS
 	htmlFlags |= blackfriday.HTML_SMARTYPANTS_LATEX_DASHES
 	renderer := blackfriday.HtmlRenderer(htmlFlags, "", "")
-		extensions := 0
+	extensions := 0
 	extensions |= blackfriday.EXTENSION_NO_INTRA_EMPHASIS
 	extensions |= blackfriday.EXTENSION_TABLES
 	extensions |= blackfriday.EXTENSION_FENCED_CODE
@@ -485,6 +486,7 @@ func build_index(pss []Post, index, pre, next int, indexname string) {
 	var ips Indexposts
 	var tml *template.Template
 	var err error
+	ips.Conf = conf
 	ips.Posts = pss
 	ips.Slug = indexname
 	if pre != 0 {
@@ -524,7 +526,7 @@ func build_index(pss []Post, index, pre, next int, indexname string) {
 	}
 	err = tml.ExecuteTemplate(&doc, "base", ips)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error in executing the template: ", err)
 	}
 	body = doc.String()
 	if next == -1 {
