@@ -77,6 +77,7 @@ type Post struct {
 	Links   []PageLink
 	Disqus  string
 	EData   ExtraData
+	Author	string
 }
 
 /*
@@ -266,7 +267,7 @@ func read_post(filename string, conf Configuration) Post {
 	var p Post
 	var err error = nil
 	var onlyonce bool = true
-	var titleline, dateline, tagline, line string
+	var titleline, dateline, tagline, authorline, line string
 	flag := false
 	f, err := os.Open(filename)
 	if err != nil {
@@ -303,13 +304,21 @@ func read_post(filename string, conf Configuration) Post {
 				tagline = line[i+8:]
 				continue
 			}
-
+			i = strings.Index(line, ".. author:")
+			if i != -1 {
+				authorline = line[i+10:]
+				continue
+			}
 		}
 	}
 
 	if err == io.EOF {
+		if authorline == "" {
+			authorline = conf.Author
+		}
 		title := strings.TrimSpace(titleline)
 		date := strings.TrimSpace(dateline)
+		author := strings.TrimSpace(authorline)
 		tagsnonstripped := strings.Split(tagline, ",")
 		tags := make(map[string]string, 0)
 		for i := range tagsnonstripped {
@@ -332,6 +341,7 @@ func read_post(filename string, conf Configuration) Post {
 		p.Logo = conf.Logo
 		p.Links = conf.Links
 		p.Disqus = conf.Disqus
+		p.Author = author
 
 		// Let us add any extra data for the themes.
 		var edata ExtraData
@@ -404,7 +414,7 @@ func build_feeds(ps []Post, conf Configuration, name string) {
 				Description: string(post.Body),
 				Created:     post.Date.UTC(),
 				Updated:     now.UTC(),
-				Author:      &feeds.Author{conf.Author, conf.Email},
+				Author:      &feeds.Author{post.Author, conf.Email},
 				Link:        &feeds.Link{Href: post.Url},
 			}
 
@@ -414,7 +424,7 @@ func build_feeds(ps []Post, conf Configuration, name string) {
 				Description: string(post.Body),
 				Created:     post.Date.UTC(),
 				Updated:     post.Date.UTC(),
-				Author:      &feeds.Author{conf.Author, conf.Email},
+				Author:      &feeds.Author{post.Author, conf.Email},
 				Link:        &feeds.Link{Href: post.Url},
 			}
 		}
