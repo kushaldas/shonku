@@ -390,7 +390,7 @@ func get_time(text string) time.Time {
 	//fmt.Println(x)
 	new_now, err := time.Parse(longform, text)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Time parse error", err)
 	}
 	return new_now
 
@@ -439,7 +439,7 @@ func build_feeds(ps []Post, conf Configuration, name string) {
 	rss, err := feed.ToRss()
 	atom, err := feed.ToAtom()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error building feeds: ", err)
 	} else {
 		if name == "cmain" {
 			f, _ := os.Create("./output/rss.xml")
@@ -475,7 +475,7 @@ func build_post(ps Post, ptype string) string {
 	}
 	err = tml.ExecuteTemplate(&doc, "base", ps)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error executing template: ", err)
 	}
 	body = doc.String()
 
@@ -536,7 +536,7 @@ func build_index(pss []Post, index, pre, next int, indexname string) {
 		tml, err = template.ParseFiles("./templates/cat-index.html", "./templates/base.html")
 	}
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error in parsing: ", err)
 	}
 	err = tml.ExecuteTemplate(&doc, "base", ips)
 	if err != nil {
@@ -561,7 +561,7 @@ func build_index(pss []Post, index, pre, next int, indexname string) {
 	n, err := io.WriteString(f, body)
 
 	if err != nil {
-		fmt.Println(n, err)
+		fmt.Println("Write error: ", n, err)
 	}
 	// For Sitemap
 	smap := Sitemap{Loc: conf.URL + name[9:], Lastmod: current_time.Format("2006-01-02"), Priority: "0.5"}
@@ -721,7 +721,7 @@ func get_conf() Configuration {
 	var configuration Configuration
 	err := decoder.Decode(&configuration)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("get_conf: Decode error", err)
 	}
 	return configuration
 }
@@ -734,12 +734,12 @@ func build_categories(cat Catpage) {
 	var body string
 	tml, err := template.ParseFiles("./templates/category-index.html", "./templates/base.html")
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error parsing categories: ", err)
 	}
 	cat.Disqus = false
 	err = tml.ExecuteTemplate(&doc, "base", cat)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error parsing doc base: ", err)
 	}
 	body = doc.String()
 	name := "./output/categories/index.html"
@@ -748,7 +748,7 @@ func build_categories(cat Catpage) {
 	n, err := io.WriteString(f, body)
 
 	if err != nil {
-		fmt.Println(n, err)
+		fmt.Println("build_categories write error: ", n, err)
 	}
 	// For Sitemap
 	smap := Sitemap{Loc: conf.URL + "categories/index.html", Lastmod: current_time.Format("2006-01-02"), Priority: "0.5"}
@@ -768,12 +768,12 @@ func create_archive(years map[string][]Post) {
 	var body string
 	tml, err := template.ParseFiles("./templates/archive.html", "./templates/base.html")
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("create_archive: parse error", err)
 	}
 	archive.Disqus = false
 	err = tml.ExecuteTemplate(&doc, "base", archive)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("create_archive: execute_template: ", err)
 	}
 	body = doc.String()
 	name := "./output/archive.html"
@@ -782,7 +782,7 @@ func create_archive(years map[string][]Post) {
 	n, err := io.WriteString(f, body)
 	f.Close()
 	if err != nil {
-		fmt.Println(n, err)
+		fmt.Println("create_archive write error: ", n, err)
 	}
 	// For Sitemap
 	smap := Sitemap{Loc: conf.URL + "archive.html", Lastmod: current_time.Format("2006-01-02"), Priority: "0.5"}
