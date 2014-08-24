@@ -204,7 +204,11 @@ func findfiles(dir string) []string {
 	files, _ := ioutil.ReadDir(dir)
 	names := make([]string, 0)
 	for _, f := range files {
-		names = append(names, dir+f.Name())
+		var filename string
+		filename = f.Name()
+		if (strings.HasSuffix(filename, ".md")) {
+			names = append(names, dir+filename)
+		}
 	}
 	return names
 }
@@ -972,7 +976,7 @@ func site_rebuild(rebuild, rebuild_index bool) {
 	rsync(frompath, topath)
 	frompath = curpath + "/posts/"
 	topath = curpath + "/output/posts/"
-	rsync(frompath, topath)
+	rsync(frompath, topath, "--include=*.md", "--exclude=*")
 	frompath = curpath + "/pages/"
 	topath = curpath + "/output/pages/"
 	rsync(frompath, topath)
@@ -985,8 +989,11 @@ func site_rebuild(rebuild, rebuild_index bool) {
 /*
 Runs the rsync command with the given paths.
 */
-func rsync(frompath, topath string) {
-	cmd := exec.Command("rsync", "-avz", frompath, topath)
+func rsync(frompath string, topath string, optargs ...string) {
+	var cmd *exec.Cmd
+	args := []string{"-avz", frompath, topath}
+	args = append(args, optargs...)
+	cmd = exec.Command("rsync", args...)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err := cmd.Run()
