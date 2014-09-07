@@ -25,12 +25,20 @@ and then ::
 Install the dependencies
 -------------------------
 
-After golang installation, get the dependent libraries. 
+After golang installation, get the dependent libraries.
 ::
 
     $ go get github.com/russross/blackfriday
     $ go get github.com/gorilla/feeds
 	$ go get code.google.com/p/go.net/html
+
+Get the latest Shonku code
+===========================
+
+Use git to clone the repository
+::
+
+  $ git clone https://github.com/kushaldas/shonku.git
 
 Building the source
 ===================
@@ -51,6 +59,6 @@ binary.
 ::
 
 	$ go-bindata assets/... templates/
-	
+
 .. note::
 	Remember to install go-bindata from `here <https://github.com/jteeuwen/go-bindata>`_.
