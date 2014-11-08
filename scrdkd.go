@@ -77,7 +77,7 @@ type Post struct {
 	Links   []PageLink
 	Disqus  string
 	EData   ExtraData
-	Author	string
+	Author  string
 }
 
 /*
@@ -206,7 +206,7 @@ func findfiles(dir string) []string {
 	for _, f := range files {
 		var filename string
 		filename = f.Name()
-		if (strings.HasSuffix(filename, ".md")) {
+		if strings.HasSuffix(filename, ".md") {
 			names = append(names, dir+filename)
 		}
 	}
@@ -832,29 +832,38 @@ Creates the index pages as required.
 */
 func create_index_files(ps []Post, indexname string) {
 	var prev, next int
+	index_page_flag := false
 	index := 1
 	num := 0
 	length := len(ps)
 	sort.Sort(ByODate(ps))
 	sort_index := make([]Post, 0)
 	for i := range ps {
+		if ps[i].Changed {
+			index_page_flag = true
+		}
 		sort_index = append(sort_index, ps[i])
 		num = num + 1
 		if num == POSTN {
-			sort.Sort(ByDate(sort_index))
-			if index == 1 {
-				prev = 0
-			} else {
-				prev = index - 1
+			/* Only changed indexes should get rebuild*/
+			if index_page_flag == true {
+				index_page_flag = false
+				sort.Sort(ByDate(sort_index))
+				if index == 1 {
+					prev = 0
+				} else {
+					prev = index - 1
+				}
+				if (index*POSTN) < length && (length-index*POSTN) > POSTN {
+					next = index + 1
+				} else if (index * POSTN) == length {
+					next = -1
+				} else {
+					next = 0
+				}
+
+				build_index(sort_index, index, prev, next, indexname)
 			}
-			if (index*POSTN) < length && (length-index*POSTN) > POSTN {
-				next = index + 1
-			} else if (index * POSTN) == length {
-				next = -1
-			} else {
-				next = 0
-			}
-			build_index(sort_index, index, prev, next, indexname)
 
 			sort_index = make([]Post, 0)
 			index = index + 1

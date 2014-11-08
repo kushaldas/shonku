@@ -74,3 +74,18 @@ When you create a new post it will contain something similar to the details belo
 
 You can add more tags to the post, they are comma separated. This post format is
 same of Nikola v7.x, that means it is interchangable between these two blog engines.
+
+
+Individual author per post
+---------------------------
+
+We can have individual author for each post. Just add the following line in any of the 
+post where you want a different author (do it in the comments as show in above).
+
+::
+
+  .. author: AUTHOR NAME
+
+
+
+

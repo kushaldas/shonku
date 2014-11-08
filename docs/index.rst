@@ -6,6 +6,8 @@
 Welcome to Shonku's documentation!
 ==================================
 
+Shonku is a static blog generator written in golang.
+
 Contents:
 
 .. toctree::
