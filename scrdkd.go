@@ -305,7 +305,10 @@ func read_post(filename string, conf Configuration) Post {
 			}
 			i = strings.Index(line, ".. tags:")
 			if i != -1 {
-				tagline = line[i+8:]
+				tagline = strings.TrimSpace(line[i+8:])
+				if tagline == "" {
+				  tagline = "Uncategorized"
+				}
 				continue
 			}
 			i = strings.Index(line, ".. author:")
