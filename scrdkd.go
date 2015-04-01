@@ -307,7 +307,7 @@ func read_post(filename string, conf Configuration) Post {
 			if i != -1 {
 				tagline = strings.TrimSpace(line[i+8:])
 				if tagline == "" {
-				  tagline = "Uncategorized"
+					tagline = "Uncategorized"
 				}
 				continue
 			}
@@ -831,18 +831,18 @@ func create_archive(years map[string][]Post) {
 Check if missing index page.
 */
 func check_index(indexname string, index int) bool {
-    var name string
+	var name string
 
-    if indexname == "index" {
-        name = fmt.Sprintf("./output/%s-%d.html", indexname, index)
-    } else {
-        name = fmt.Sprintf("./output/categories/%s-%d.html", indexname, index)
-    }
-    if exists(name) {
-        return true
-    } else {
-        return false
-    }
+	if indexname == "index" {
+		name = fmt.Sprintf("./output/%s-%d.html", indexname, index)
+	} else {
+		name = fmt.Sprintf("./output/categories/%s-%d.html", indexname, index)
+	}
+	if exists(name) {
+		return true
+	} else {
+		return false
+	}
 
 }
 
@@ -864,9 +864,9 @@ func create_index_files(ps []Post, indexname string) {
 		sort_index = append(sort_index, ps[i])
 		num = num + 1
 		if num == POSTN {
-                        if ! check_index(indexname, index) {
-                            index_page_flag = true
-                        }
+			if !check_index(indexname, index) {
+				index_page_flag = true
+			}
 
 			/* Only changed indexes should get rebuild*/
 			if index_page_flag == true {
@@ -990,8 +990,7 @@ func site_rebuild(rebuild, rebuild_index bool) {
 
 	sort.Sort(ByODate(ps))
 
-
-        create_index_files(ps, "index")
+	create_index_files(ps, "index")
 	// If required then rebuild the primary index pages.
 	if rebuild_index == true {
 
