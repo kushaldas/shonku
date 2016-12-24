@@ -78,6 +78,7 @@ type Post struct {
 	Disqus  string
 	EData   ExtraData
 	Author  string
+	Conf    Configuration
 }
 
 /*
@@ -96,6 +97,7 @@ type Catpage struct {
 	Logo   string
 	Links  []PageLink
 	Disqus bool
+	Conf   Configuration
 }
 
 /*
@@ -106,6 +108,7 @@ type Archivepage struct {
 	Logo   string
 	Links  []PageLink
 	Disqus bool
+	Conf   Configuration
 }
 
 /*
@@ -117,6 +120,7 @@ type Archivelist struct {
 	Logo    string
 	Links   []PageLink
 	Disqus  bool
+	Conf    Configuration
 }
 
 type Indexposts struct {
@@ -355,6 +359,7 @@ func read_post(filename string, conf Configuration) Post {
 		edata.BrokenDate = p.Date.Format("Jan 02, 2006")
 		edata.BrokenTime = p.Date.Format("15:04")
 		p.EData = edata
+		p.Conf = conf
 
 	}
 	return p
@@ -764,7 +769,7 @@ func create_archive(years map[string][]Post) {
 		yearslist = append(yearslist, k)
 	}
 	sort.Sort(sort.Reverse(sort.StringSlice(yearslist)))
-	archive := Archivepage{Years: yearslist, Links: conf.Links, Logo: conf.Logo}
+	archive := Archivepage{Years: yearslist, Links: conf.Links, Logo: conf.Logo, Conf: conf}
 
 	//First create the archive index page.
 	var doc bytes.Buffer
@@ -802,7 +807,7 @@ func create_archive(years map[string][]Post) {
 				Url:  fmt.Sprintf("posts/%s.html", p.Slug),
 				Text: p.Title})
 		}
-		ar := Archivelist{Year: k, ArLinks: ps, Logo: conf.Logo, Links: conf.Links}
+		ar := Archivelist{Year: k, ArLinks: ps, Logo: conf.Logo, Links: conf.Links, Conf: conf}
 		ar.Disqus = false
 		tml2, err := template.ParseFiles("./templates/year.html", "./templates/base.html")
 		if err != nil {
@@ -966,7 +971,7 @@ func site_rebuild(rebuild, rebuild_index bool) {
 		SDB[post.Url] = smap
 	}
 
-	cat := Catpage{Cats: catnames, Links: conf.Links, Logo: conf.Logo}
+	cat := Catpage{Cats: catnames, Links: conf.Links, Logo: conf.Logo, Conf: conf}
 	build_categories(cat)
 
 	//Now create index(s) for categories.
