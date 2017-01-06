@@ -1,7 +1,7 @@
 Theming
 ========
 
-We have a very simple them in Shonku and one can easily modify the theme.
+We have a very simple theme in Shonku and one can easily modify the theme.
 
 The primary directory to keep in mind is *templates*. This is where all template
 files are. If you make any changes to the templates remember to do a force build
