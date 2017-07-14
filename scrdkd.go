@@ -40,6 +40,7 @@ type Configuration struct {
 	Description    string
 	Logo           string
 	Links          []PageLink
+	WithAMP	       bool
 }
 
 /*
@@ -67,11 +68,13 @@ type Post struct {
 	Title   string
 	Slug    string
 	Body    template.HTML
+	AMPBody template.HTML
 	Date    time.Time
 	S_Date  string
 	Tags    map[string]string
 	Changed bool
 	Url     string
+	AMPUrl  string
 	Durl    template.JSStr
 	Logo    string
 	Links   []PageLink
@@ -272,6 +275,7 @@ Reads a post and gets all details from it.
 */
 func read_post(filename string, conf Configuration) Post {
 	var buffer bytes.Buffer
+	var ampbuffer bytes.Buffer
 	var p Post
 	var err error = nil
 	var onlyonce bool = true
@@ -286,6 +290,9 @@ func read_post(filename string, conf Configuration) Post {
 	r := bufio.NewReader(f)
 	for err == nil {
 		line, err = r.ReadString('\n')
+		if !strings.HasPrefix(line, "![") {
+			ampbuffer.WriteString(line)
+		}
 		buffer.WriteString(line)
 		if onlyonce && strings.HasPrefix(line, "<!--") {
 			onlyonce = false
@@ -342,12 +349,15 @@ func read_post(filename string, conf Configuration) Post {
 		length := len(slug)
 		p.Slug = slug[:length-3]
 		body := MD(buffer.Bytes())
+		ampbody := MD(ampbuffer.Bytes())
 		p.Body = template.HTML(string(body))
+		p.AMPBody = template.HTML(string(ampbody))
 		p.Date = get_time(date)
 		p.S_Date = date
 		p.Tags = tags
 		p.Changed = false
 		p.Url = fmt.Sprintf("%sposts/%s.html", conf.URL, p.Slug)
+		p.AMPUrl = fmt.Sprintf("%sposts/amp/%s.html", conf.URL, p.Slug)
 		p.Durl = template.JSStr(p.Url)
 		p.Logo = conf.Logo
 		p.Links = conf.Links
@@ -476,10 +486,13 @@ func build_post(ps Post, ptype string) string {
 	if ptype == "post" {
 		tml, err = template.ParseFiles("./templates/post.html", "./templates/base.html")
 		name = "./output/posts/" + ps.Slug + ".html"
-	} else {
+	} else if ptype == "page" {
 		// This should read the pages template
 		tml, err = template.ParseFiles("./templates/page.html", "./templates/base.html")
 		name = "./output/pages/" + ps.Slug + ".html"
+	} else if ptype == "post-amp"{
+		tml, err = template.ParseFiles("./templates/post-amp.html", "./templates/base-amp.html")
+		name = "./output/posts/amp/" + ps.Slug + ".html"
 	}
 	err = tml.ExecuteTemplate(&doc, "base", ps)
 	if err != nil {
@@ -938,6 +951,9 @@ func site_rebuild(rebuild, rebuild_index bool) {
 		if rebuild || changed_ornot(names[i], hash) {
 			fmt.Println("Building post:", names[i])
 			build_post(post, "post")
+			if conf.WithAMP == true {
+				build_post(post, "post-amp")
+			}
 			rebuild_index = true
 			// Also mark that this post was changed on disk
 			post.Changed = true
