@@ -13,3 +13,5 @@ is *conf.json*. Various values of the file is explained below.
 * "Email" - Author's email.
 * "Disqus" - your disqus name for dynamic comments.
 * "Links" - For the links in the header of each page.
+* "WithAMP" - If you have *true* for this, then it will try to build AMP post pages (you need output/posts/amp directory
+for this to work.
