@@ -30,7 +30,7 @@ After golang installation, get the dependent libraries.
 
     $ go get github.com/russross/blackfriday
     $ go get github.com/gorilla/feeds
-	$ go get code.google.com/p/go.net/html
+    $ go get golang.org/x/net/html
 
 Get the latest Shonku code
 ===========================
