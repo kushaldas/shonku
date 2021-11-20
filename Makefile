@@ -1,6 +1,7 @@
 all:
-	go build -o shonku.bin scrdkd.go posts.go bindata.go
+	GO111MODULE=auto go build -o shonku.bin scrdkd.go posts.go bindata.go
 
 clean:
-	rm .scrdkd.db
+	rm -f .scrdkd.db
 	rm -rf output/*.html
+	rm -f shonku.bin
