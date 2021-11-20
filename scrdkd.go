@@ -1038,7 +1038,7 @@ func site_rebuild(rebuild, rebuild_index bool) {
 	topath = curpath + "/output/pages/"
 	rsync(frompath, topath)
 	frompath = curpath + "/files/"
-	topath = curpath + "/output/"
+	topath = curpath + "/output/files/"
 	rsync(frompath, topath)
 
 }
